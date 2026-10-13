@@ -1,0 +1,12 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:3000}
+    image: ftm-platform-ui-react:latest
+    container_name: ftm-platform-ui
+    ports:
+      - "4000:80"
+    restart: unless-stopped
