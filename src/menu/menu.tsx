@@ -12,6 +12,7 @@ export const menus: MenuItemType[] = [
     id: "project",
     title: "Gestion des projets",
     icon: <FolderIcon />,
+    userTypes: ["PARTNER_CONTACT", "BOARD_MEMBER", "EMPLOYEE", "ADMIN", "USER"],
     children: [
       {
         id: "dashboard-program",
@@ -23,8 +24,8 @@ export const menus: MenuItemType[] = [
         id: "projects",
         title: "Projets",
         path: "/projects",
-        permissions: ["projects.view"],
         icon: <ChevronRightOutlinedIcon />,
+        userTypes: ["PARTNER_CONTACT", "EMPLOYEE", "ADMIN"],
       },
       {
         id: "submitted-reports",

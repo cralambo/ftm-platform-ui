@@ -25,6 +25,7 @@ import CreateProject from "@/features/project/CreateProject";
 import Home from "@/features/home/Home";
 import RoleList from "@/pages/role/RoleList";
 import ProjectDetail from "@/features/project/ProjectDetail";
+import DisbursementScheduleDetail from "@/features/disbursement_schedules/DisbursementScheduleDetail";
 
 const AdminRoutes = (): JSX.Element => {
   const [theme, colorMode] = useMode();
@@ -68,10 +69,14 @@ const AdminRoutes = (): JSX.Element => {
               <Route path="/projects/:id" element={<ProjectDetail />} />
 
               <Route path="/security/roles" element={<RoleList />} />
+              <Route
+                path="/disbursement-schedules/:id"
+                element={<DisbursementScheduleDetail />}
+              />
             </Route>
           </Route>
 
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<Navigate to="/home" replace />} />
         </Routes>
       </ThemeProvider>
     </ColorModeContext.Provider>
