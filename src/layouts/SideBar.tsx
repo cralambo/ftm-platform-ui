@@ -1,36 +1,59 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Box, IconButton, Typography, useTheme } from "@mui/material";
 import { Sidebar, Menu, MenuItem, SubMenu } from "react-pro-sidebar";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
+
 import { tokens } from "../theme";
 import type { MenuItemType } from "../menu/menu.type";
-import { menus } from "../menu/menu";
-
+import { menus } from "@/menu/menu";
+import { filterMenus } from "@/utils/filterMenus";
+import type { RootState } from "@/app/store";
 
 const SideBar = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-
   const navigate = useNavigate();
-
 
   const [collapsed, setCollapsed] = useState(false);
 
+  // =========================================================
+  // UTILISATEUR CONNECTÉ
+  // =========================================================
+
+  const user = useSelector((state: RootState) => state.auth.user);
+
+  // =========================================================
+  // FILTRAGE DES MENUS
+  // =========================================================
+
+  const visibleMenus = useMemo(() => filterMenus(menus, user), [user]);
+
+  // =========================================================
+  // RENDU RÉCURSIF DES MENUS
+  // =========================================================
 
   const renderMenu = (menu: MenuItemType): React.ReactNode => {
-
     if (menu.children?.length) {
-      const children = menu.children.map(renderMenu).filter(Boolean);
+      const children = menu.children
+        .map(renderMenu)
+        .filter((child) => child !== null);
 
-      if (children.length === 0) return null;
+      if (children.length === 0) {
+        return null;
+      }
 
       return (
         <SubMenu key={menu.id} label={menu.title} icon={menu.icon}>
           {children}
         </SubMenu>
       );
+    }
+
+    if (!menu.path) {
+      return null;
     }
 
     return (
@@ -43,6 +66,10 @@ const SideBar = () => {
       </MenuItem>
     );
   };
+
+  // =========================================================
+  // DESIGN
+  // =========================================================
 
   return (
     <Box
@@ -103,7 +130,7 @@ const SideBar = () => {
           backgroundColor:
             theme.palette.mode === "light"
               ? "#f0f0f0 !important"
-              : colors.primary[500] + " !important",
+              : `${colors.primary[500]} !important`,
         },
 
         "& .ps-submenu-content .ps-menu-button": {
@@ -123,6 +150,7 @@ const SideBar = () => {
           background: "#999",
           borderRadius: "10px",
         },
+
         "--scroll-thumb":
           theme.palette.mode === "dark"
             ? colors.blueAccent[600]
@@ -159,15 +187,15 @@ const SideBar = () => {
           backgroundColor: "var(--scroll-thumb-hover)",
         },
 
-        /* Firefox */
         scrollbarWidth: "thin",
         scrollbarColor: "var(--scroll-thumb) var(--scroll-track)",
       }}
     >
       <Sidebar collapsed={collapsed}>
         <Menu>
+          {/* EN-TÊTE */}
           <MenuItem
-            onClick={() => setCollapsed(!collapsed)}
+            onClick={() => setCollapsed((previous) => !previous)}
             icon={collapsed ? <MenuOutlinedIcon /> : undefined}
             style={{
               margin: "10px 0 20px 0",
@@ -195,8 +223,9 @@ const SideBar = () => {
                 </Typography>
 
                 <IconButton
-                  onClick={() => setCollapsed(!collapsed)}
+                  onClick={() => setCollapsed((previous) => !previous)}
                   size="small"
+                  aria-label="Réduire ou développer le menu"
                 >
                   <MenuOutlinedIcon />
                 </IconButton>
@@ -204,7 +233,48 @@ const SideBar = () => {
             )}
           </MenuItem>
 
-          {menus.map(renderMenu)}
+          {/* CONTENU DYNAMIQUE SELON L'UTILISATEUR */}
+          <Box
+            sx={{
+              flex: 1,
+              minHeight: 0,
+              overflowY: "auto",
+            }}
+          >
+            {visibleMenus.map(renderMenu)}
+          </Box>
+
+          {/* Informations utilisateur fixées en bas */}
+          {!collapsed && user && (
+            <Box
+              sx={{
+                mt: "auto",
+                flexShrink: 0,
+                p: 2,
+                borderTop: `1px solid ${colors.grey[700]}`,
+                textAlign: "center",
+                backgroundColor:
+                  theme.palette.mode === "dark"
+                    ? colors.primary[600]
+                    : "#f5f5f5",
+              }}
+            >
+              <Typography
+                variant="h6"
+                sx={{
+                  overflowWrap: "anywhere",
+                  color: colors.grey[100],
+                  fontWeight: "bold",
+                }}
+              >
+                {user.fullName || `${user.firstname} ${user.lastname}`}
+              </Typography>
+
+              <Typography variant="body2" color={colors.greenAccent[500]}>
+                {user.userType}
+              </Typography>
+            </Box>
+          )}
         </Menu>
       </Sidebar>
     </Box>
