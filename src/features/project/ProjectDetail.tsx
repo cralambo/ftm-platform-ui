@@ -27,6 +27,7 @@ import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutlineOutlined";
+import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 
 import { formatDate } from "@/utils/date";
 import { getErrorMessage } from "@/utils/errors";
@@ -236,7 +237,14 @@ export default function ProjectDetail() {
   const status = statusMeta(project.status);
   const coFunders = project.project_co_funders ?? [];
   const grant = project.granted_project;
-  const disbursement_schedules = project.disbursement_schedules ?? [];
+  const disbursement_schedules = [
+    ...(project.disbursement_schedules ?? []),
+  ].sort((a, b) =>
+    a.reference.localeCompare(b.reference, undefined, {
+      numeric: true,
+      sensitivity: "base",
+    }),
+  );
 
   // co_funders_contribution est null côté API : on recalcule depuis les lignes
   const budget = computeBudget({
@@ -277,6 +285,7 @@ export default function ProjectDetail() {
     : isFullyDisbursed
       ? "Le total des décaissements atteint 100 % de l'octroi"
       : "";
+  // REPORT
 
   // =======================================================
   // RENDER
@@ -629,11 +638,11 @@ export default function ProjectDetail() {
               <Table size="small">
                 <TableHead>
                   <TableRow>
-                    <TableCell>Référence</TableCell>
-                    <TableCell>Date du décaissement</TableCell>
+                    <TableCell align="right">Référence</TableCell>
+                    <TableCell align="right">Date du décaissement</TableCell>
                     <TableCell align="right">Montant du décaissement</TableCell>
                     <TableCell align="right">Pourcentage</TableCell>
-                    <TableCell>Date d'envoi rapport</TableCell>
+                    <TableCell align="right">Date d'envoi rapport</TableCell>
                     <TableCell align="right">Actions</TableCell>
                   </TableRow>
                 </TableHead>
@@ -641,22 +650,27 @@ export default function ProjectDetail() {
                 <TableBody>
                   {disbursement_schedules.map((row) => (
                     <TableRow key={row.id}>
-                      <TableCell sx={{ fontWeight: 600 }}>
+                      <TableCell sx={{ fontWeight: 600 }} align="right">
                         {row.reference}
                       </TableCell>
-                      <TableCell>
+                      <TableCell align="right">
                         {formatDate(row.disbursement_month)}
                       </TableCell>
                       <TableCell align="right">
                         {money(row.disbursement_amount)}
                       </TableCell>
                       <TableCell align="right">{row.percentage} %</TableCell>
-                      <TableCell>
+                      <TableCell align="right">
                         {formatDate(row.report_submission_date)}
                       </TableCell>
                       <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>
                         <Tooltip title="Ajouter des activités">
-                          <IconButton size="small">
+                          <IconButton
+                            size="small"
+                            onClick={() =>
+                              navigate(`/disbursement-schedules/${row.id}`)
+                            }
+                          >
                             <AddCircleOutlineIcon />
                           </IconButton>
                         </Tooltip>
@@ -670,12 +684,23 @@ export default function ProjectDetail() {
                             <DeleteIcon />
                           </IconButton>
                         </Tooltip>
+                        <Tooltip title="Voir ou compléter le rapport">
+                          <span>
+                            <IconButton size="small">
+                              <DescriptionOutlinedIcon />
+                            </IconButton>
+                          </span>
+                        </Tooltip>
                       </TableCell>
                     </TableRow>
                   ))}
 
                   <TableRow>
-                    <TableCell sx={{ fontWeight: 600 }} colSpan={2}>
+                    <TableCell
+                      align="right"
+                      sx={{ fontWeight: 600 }}
+                      colSpan={2}
+                    >
                       Total
                     </TableCell>
                     <TableCell align="right" sx={{ fontWeight: 600 }}>

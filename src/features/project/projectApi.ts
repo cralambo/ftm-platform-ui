@@ -35,6 +35,23 @@ export const projectApi = api.injectEndpoints({
       ],
     }),
 
+    getMyPartnerProjects: build.query<Page<Project>, PageParams>({
+      query: ({ page, size }) => ({
+        url: "/projects/partner",
+        params: { page, size },
+      }),
+
+      transformResponse: (raw: unknown) => normalizePage<Project>(raw),
+
+      providesTags: (result) => [
+        LIST,
+        ...(result?.content ?? []).map((project) => ({
+          type: "Project" as const,
+          id: project.id,
+        })),
+      ],
+    }),
+
     // =====================================================
     // DETAIL
     // =====================================================
@@ -102,6 +119,7 @@ export const projectApi = api.injectEndpoints({
 
 export const {
   useGetProjectsQuery,
+  useGetMyPartnerProjectsQuery,
   useGetProjectByIdQuery,
   useCreateProjectMutation,
   useUpdateProjectMutation,
