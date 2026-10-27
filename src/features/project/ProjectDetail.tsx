@@ -27,7 +27,8 @@ import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutlineOutlined";
-import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
+import CircularProgress from "@mui/material/CircularProgress";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 
 import { formatDate } from "@/utils/date";
 import { getErrorMessage } from "@/utils/errors";
@@ -39,6 +40,8 @@ import type { DisbursementSchedule } from "../disbursement_schedules/disbursemen
 import CreateDisbursementScheduleFormDialog from "../disbursement_schedules/CreateDisbursementScheduleFormDialog";
 import { tokens } from "@/theme";
 import CommonTable from "@/components/CommonTable";
+import { useInitializePartnerReportMutation } from "../report/partnerReportApi";
+import { enqueueSnackbar } from "notistack";
 
 // =========================================================
 // COMPOSANTS LOCAUX
@@ -179,6 +182,9 @@ export default function ProjectDetail() {
   const [formOpen, setFormOpen] = useState(false);
   const [selected, setSelected] = useState<DisbursementSchedule | null>(null);
 
+  const [initializePartnerReport, { isLoading: isInitializingReport }] =
+    useInitializePartnerReportMutation();
+
   const openForm = (disbursementSchedule: DisbursementSchedule | null) => {
     setSelected(disbursementSchedule);
     setFormOpen(true);
@@ -286,6 +292,20 @@ export default function ProjectDetail() {
       ? "Le total des décaissements atteint 100 % de l'octroi"
       : "";
   // REPORT
+
+  const handleViewReport = async (scheduleId: string) => {
+    try {
+      const report = await initializePartnerReport({
+        disbursement_schedule_id: scheduleId,
+      }).unwrap();
+
+      navigate(`/partner-reports/${report.id}`);
+    } catch (error) {
+      enqueueSnackbar("Impossible d'initialiser le rapport partenaire.", {
+        variant: "error",
+      });
+    }
+  };
 
   // =======================================================
   // RENDER
@@ -648,27 +668,29 @@ export default function ProjectDetail() {
                 </TableHead>
 
                 <TableBody>
-                  {disbursement_schedules.map((row) => (
-                    <TableRow key={row.id}>
+                  {disbursement_schedules.map((schedule) => (
+                    <TableRow key={schedule.id}>
                       <TableCell sx={{ fontWeight: 600 }} align="right">
-                        {row.reference}
+                        {schedule.reference}
                       </TableCell>
                       <TableCell align="right">
-                        {formatDate(row.disbursement_month)}
+                        {formatDate(schedule.disbursement_month)}
                       </TableCell>
                       <TableCell align="right">
-                        {money(row.disbursement_amount)}
+                        {money(schedule.disbursement_amount)}
                       </TableCell>
-                      <TableCell align="right">{row.percentage} %</TableCell>
                       <TableCell align="right">
-                        {formatDate(row.report_submission_date)}
+                        {schedule.percentage} %
+                      </TableCell>
+                      <TableCell align="right">
+                        {formatDate(schedule.report_submission_date)}
                       </TableCell>
                       <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>
                         <Tooltip title="Ajouter des activités">
                           <IconButton
                             size="small"
                             onClick={() =>
-                              navigate(`/disbursement-schedules/${row.id}`)
+                              navigate(`/disbursement-schedules/${schedule.id}`)
                             }
                           >
                             <AddCircleOutlineIcon />
@@ -686,8 +708,16 @@ export default function ProjectDetail() {
                         </Tooltip>
                         <Tooltip title="Voir ou compléter le rapport">
                           <span>
-                            <IconButton size="small">
-                              <DescriptionOutlinedIcon />
+                            <IconButton
+                              size="small"
+                              disabled={isInitializingReport}
+                              onClick={() => handleViewReport(schedule.id)}
+                            >
+                              {isInitializingReport ? (
+                                <CircularProgress size={20} />
+                              ) : (
+                                <VisibilityIcon />
+                              )}
                             </IconButton>
                           </span>
                         </Tooltip>

@@ -26,6 +26,7 @@ import Home from "@/features/home/Home";
 import RoleList from "@/pages/role/RoleList";
 import ProjectDetail from "@/features/project/ProjectDetail";
 import DisbursementScheduleDetail from "@/features/disbursement_schedules/DisbursementScheduleDetail";
+import PartnerReportTreatment from "@/features/report/PartnerReportTreatment";
 
 const AdminRoutes = (): JSX.Element => {
   const [theme, colorMode] = useMode();
@@ -72,6 +73,10 @@ const AdminRoutes = (): JSX.Element => {
               <Route
                 path="/disbursement-schedules/:id"
                 element={<DisbursementScheduleDetail />}
+              />
+              <Route
+                path="/partner-reports/:id"
+                element={<PartnerReportTreatment />}
               />
             </Route>
           </Route>
