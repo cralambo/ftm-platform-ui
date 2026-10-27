@@ -43,6 +43,18 @@ export const partnerReportApi = api.injectEndpoints({
       invalidatesTags: [LIST],
     }),
 
+    initializePartnerReport: build.mutation<
+      PartnerReport,
+      PartnerReportCreateInput
+    >({
+      query: (body) => ({
+        url: "/partner-reports/initialize",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: [LIST],
+    }),
+
     updatePartnerReport: build.mutation<
       PartnerReport,
       { id: string } & PartnerReportUpdateInput
@@ -70,6 +82,7 @@ export const {
   useGetPartnerReportQuery,
   useGetPartnerReportDetailQuery,
   useAddPartnerReportMutation,
+  useInitializePartnerReportMutation,
   useUpdatePartnerReportMutation,
   useDeletePartnerReportMutation,
 } = partnerReportApi;
