@@ -9,7 +9,6 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableHead,
   TableRow,
   Tooltip,
   Typography,
@@ -29,6 +28,7 @@ import {
 import type { CoFunder } from "@/features/coFunder/coFunder.types";
 import CommonTablePagination from "@/components/CommonTablePagination";
 import CommonTable from "@/components/CommonTable";
+import CommonTableHead from "@/components/CommonTableHead";
 
 export default function CoFunderList() {
   const { page, size, setPage, changeSize } = usePagination();
@@ -86,15 +86,12 @@ export default function CoFunderList() {
           <CommonTable>
             {isFetching && <LinearProgress />}
             <Table size="small">
-              <TableHead>
-                <TableRow>
-                  <TableCell sx={{ fontWeight: 600 }}>Nom</TableCell>
-                  <TableCell align="right" sx={{ fontWeight: 600 }}>
-                    Actions
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-
+              <CommonTableHead
+                columns={[
+                  { label: "Nom" },
+                  { label: "Actions", align: "right", width: 100 },
+                ]}
+              />
               <TableBody>
                 {coFunders.length === 0 && !isFetching && (
                   <TableRow>

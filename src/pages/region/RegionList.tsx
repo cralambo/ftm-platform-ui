@@ -9,7 +9,6 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableHead,
   TableRow,
   Tooltip,
   Typography,
@@ -29,6 +28,7 @@ import {
 import type { Region } from "@/features/region/region.types";
 import CommonTable from "@/components/CommonTable";
 import CommonTablePagination from "@/components/CommonTablePagination";
+import CommonTableHead from "@/components/CommonTableHead";
 
 export default function RegionList() {
   const { page, size, setPage, changeSize } = usePagination();
@@ -87,15 +87,12 @@ export default function RegionList() {
           <CommonTable>
             {isFetching && <LinearProgress />}
             <Table size="small">
-              <TableHead>
-                <TableRow>
-                  <TableCell sx={{ fontWeight: 600 }}>Nom</TableCell>
-                  <TableCell align="right" sx={{ fontWeight: 600 }}>
-                    Actions
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-
+              <CommonTableHead
+                columns={[
+                  { label: "Région" },
+                  { label: "Actions", align: "right", width: 100 },
+                ]}
+              />
               <TableBody>
                 {regions.length === 0 && !isFetching && (
                   <TableRow>

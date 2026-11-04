@@ -1,8 +1,14 @@
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import {
-  Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle,
-  Stack, TextField,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Stack,
+  TextField,
+  useTheme,
 } from "@mui/material";
 import { useNotify } from "@/hooks/useNotify";
 import { fieldProps } from "@/utils/formik";
@@ -12,10 +18,21 @@ import {
   useUpdateStrategicPlanMutation,
 } from "./strategicPlanApi";
 import type { StrategicPlan, StrategicPlanInput } from "./strategicPlan.types";
+import { tokens } from "@/theme";
+import CommonGreyButton from "@/components/CommonGreyButton";
+import CommonBlueButton from "@/components/CommonBlueButton";
+import CommonDatePicker from "@/components/common/CommonDatePicker";
+import dayjs from "dayjs";
 
 const schema = Yup.object({
-  code: Yup.string().trim().required("Code obligatoire").max(20, "20 caractères max"),
-  name: Yup.string().trim().required("Nom obligatoire").max(150, "150 caractères max"),
+  code: Yup.string()
+    .trim()
+    .required("Code obligatoire")
+    .max(20, "20 caractères max"),
+  name: Yup.string()
+    .trim()
+    .required("Nom obligatoire")
+    .max(150, "150 caractères max"),
   start_date: Yup.string().required("Date de début obligatoire"),
   end_date: Yup.string()
     .required("Date de fin obligatoire")
@@ -26,7 +43,7 @@ const schema = Yup.object({
         const { start_date } = this.parent as { start_date?: string };
         // le format ISO (YYYY-MM-DD) se compare correctement comme du texte
         return !value || !start_date || value >= start_date;
-      }
+      },
     ),
   description: Yup.string().max(1000, "1000 caractères max"),
 });
@@ -37,6 +54,8 @@ interface Props {
 }
 
 export default function StrategicPlanFormDialog({ plan, onClose }: Props) {
+  const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
   const [addPlan] = useAddStrategicPlanMutation();
   const [updatePlan] = useUpdateStrategicPlanMutation();
   const notify = useNotify();
@@ -63,29 +82,65 @@ export default function StrategicPlanFormDialog({ plan, onClose }: Props) {
   });
 
   return (
-    <Dialog open onClose={formik.isSubmitting ? undefined : onClose} maxWidth="sm" fullWidth>
+    <Dialog
+      open
+      onClose={formik.isSubmitting ? undefined : onClose}
+      maxWidth="sm"
+      fullWidth
+      sx={[
+        {
+          "& .MuiDialog-paper": {
+            bgcolor:
+              theme.palette.mode === "light" ? "#ffffff" : colors.primary[600],
+            color: "text.primary",
+            backgroundImage: "none",
+            border: `1px solid ${theme.palette.divider}`,
+            borderRadius: 2,
+          },
+        },
+      ]}
+    >
       <form onSubmit={formik.handleSubmit} noValidate>
         <DialogTitle>
-          {plan ? "Modifier le plan stratégique" : "Ajouter un plan stratégique"}
+          {plan
+            ? "Modifier le plan stratégique"
+            : "Ajouter un plan stratégique"}
         </DialogTitle>
         <DialogContent sx={{ pt: "8px !important" }}>
           <Stack direction="row" spacing={2}>
-            <TextField label="Code" sx={{ width: 160, flexShrink: 0 }} {...fieldProps(formik, "code")} fullWidth={false} />
-            <TextField label="Nom" autoFocus {...fieldProps(formik, "name")} />
+            <TextField
+              label="Code"
+              size="small"
+              sx={{ width: 160, flexShrink: 0 }}
+              {...fieldProps(formik, "code")}
+              fullWidth={false}
+            />
+            <TextField
+              size="small"
+              label="Nom"
+              autoFocus
+              {...fieldProps(formik, "name")}
+            />
           </Stack>
 
           <Stack direction="row" spacing={2}>
-            <TextField
+            <CommonDatePicker
               label="Date de début"
-              type="date"
-              {...fieldProps(formik, "start_date")}
-              slotProps={{ inputLabel: { shrink: true } }}
+              name="start_date"
+              value={formik.values.start_date}
+              onChange={(value) => formik.setFieldValue("start_date", value)}
+              onBlur={() => formik.setFieldTouched("start_date", true)}
             />
-            <TextField
+            <CommonDatePicker
               label="Date de fin"
-              type="date"
-              {...fieldProps(formik, "end_date")}
-              slotProps={{ inputLabel: { shrink: true } }}
+              name="end_date"
+              value={formik.values.end_date}
+              onChange={(value) => formik.setFieldValue("end_date", value)}
+              minDate={
+                formik.values.start_date
+                  ? dayjs(formik.values.start_date)
+                  : undefined
+              }
             />
           </Stack>
 
@@ -93,19 +148,31 @@ export default function StrategicPlanFormDialog({ plan, onClose }: Props) {
             label="Description"
             multiline
             minRows={3}
+            size="small"
             {...fieldProps(formik, "description")}
           />
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button onClick={onClose} disabled={formik.isSubmitting}>Annuler</Button>
-          <Button
-            type="submit"
-            variant="contained"
+          <CommonGreyButton
+            onClick={onClose}
             disabled={formik.isSubmitting}
-            startIcon={formik.isSubmitting ? <CircularProgress size={16} color="inherit" /> : undefined}
+            size="small"
+          >
+            Annuler
+          </CommonGreyButton>
+          <CommonBlueButton
+            type="submit"
+            size="small"
+            variant="contained"
+            startIcon={
+              formik.isSubmitting ? (
+                <CircularProgress size={16} color="inherit" />
+              ) : undefined
+            }
+            disabled={formik.isSubmitting}
           >
             Enregistrer
-          </Button>
+          </CommonBlueButton>
         </DialogActions>
       </form>
     </Dialog>

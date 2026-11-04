@@ -7,6 +7,7 @@ import type {
   PartnerReportCreateInput,
   PartnerReportUpdateInput,
   PartnerReportWithSummary,
+  SubmitPartnerReportRequest,
 } from "./partnerReport.types";
 
 const LIST = { type: "PartnerReport" as const, id: "LIST" as const };
@@ -55,6 +56,21 @@ export const partnerReportApi = api.injectEndpoints({
       invalidatesTags: [LIST],
     }),
 
+    submitPartnerReport: build.mutation<
+      PartnerReport,
+      { id: string } & SubmitPartnerReportRequest
+    >({
+      query: ({ id, ...body }) => ({
+        url: `/partner-reports/${id}/submit`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: (_result, _error, { id }) => [
+        { type: "PartnerReport" as const, id },
+        LIST,
+      ],
+    }),
+
     updatePartnerReport: build.mutation<
       PartnerReport,
       { id: string } & PartnerReportUpdateInput
@@ -85,4 +101,5 @@ export const {
   useInitializePartnerReportMutation,
   useUpdatePartnerReportMutation,
   useDeletePartnerReportMutation,
+  useSubmitPartnerReportMutation,
 } = partnerReportApi;

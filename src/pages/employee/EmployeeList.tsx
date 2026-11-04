@@ -9,7 +9,6 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableHead,
   TableRow,
   Tooltip,
   Typography,
@@ -30,6 +29,7 @@ import {
 import type { Employee } from "@/features/employee/employee.types";
 import CommonTable from "@/components/CommonTable";
 import CommonTablePagination from "@/components/CommonTablePagination";
+import CommonTableHead from "@/components/CommonTableHead";
 
 export default function EmployeeList() {
   const { page, size, setPage, changeSize } = usePagination();
@@ -87,23 +87,18 @@ export default function EmployeeList() {
           <CommonTable>
             {isFetching && <LinearProgress />}
             <Table size="small">
-              <TableHead>
-                <TableRow>
-                  <TableCell sx={{ fontWeight: 600 }}>N°</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Nom</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Sigle</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Département</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Poste</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>
-                    E-mail professionnel
-                  </TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Embauche</TableCell>
-                  <TableCell align="right" sx={{ fontWeight: 600 }}>
-                    Actions
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-
+              <CommonTableHead
+                columns={[
+                  { label: "Matricule" },
+                  { label: "Nom" },
+                  { label: "Sigle" },
+                  { label: "Département" },
+                  { label: "Poste" },
+                  { label: "E-mail professionnel" },
+                  { label: "Embauche" },
+                  { label: "Actions", align: "right", width: 100 },
+                ]}
+              />
               <TableBody>
                 {employees.length === 0 && !isFetching && (
                   <TableRow>

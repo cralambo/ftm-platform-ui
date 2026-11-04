@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+
 import {
   Alert,
   Box,
   Button,
-  Card,
   CardContent,
   Chip,
   CircularProgress,
@@ -15,13 +15,31 @@ import {
   Tabs,
   TextField,
   Typography,
+  useTheme,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
 } from "@mui/material";
+
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import SendIcon from "@mui/icons-material/Send";
 import SaveIcon from "@mui/icons-material/Save";
+
 import {
   useGetPartnerReportDetailQuery,
   useUpdatePartnerReportMutation,
+  useSubmitPartnerReportMutation,
 } from "./partnerReportApi";
+
+import CommonCard from "@/components/CommonCard";
+import TechnicalReportSection from "./components/TechnicalReportSection";
+import FinancialReportSection from "./components/FinancialReportSection";
+import GeneralReportAttachments from "./components/GeneralReportAttachments";
+import { tokens } from "@/theme";
+import CommonGreyButton from "@/components/CommonGreyButton";
+import CommonBlueButton from "@/components/CommonBlueButton";
 
 const statusLabels: Record<string, string> = {
   DRAFT: "Brouillon",
@@ -64,14 +82,31 @@ const formatDate = (value?: string | null): string => {
 };
 
 export default function PartnerReportTreatment() {
+  console.log("PartnerReportTreatment chargé");
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
+  const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
+
+  // États locaux
   const [comments, setComments] = useState("");
   const [tab, setTab] = useState(0);
+
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+
+  const [confirmSubmitOpen, setConfirmSubmitOpen] = useState(false);
+
+  const [hasAllRequiredDocuments, setHasAllRequiredDocuments] = useState(false);
+
+  const [isDraftSaved, setIsDraftSaved] = useState(false);
+  const [isReportSaved, setIsReportSaved] = useState(false);
+
+  // Chargement du rapport
   const { data, isLoading, isError, refetch } = useGetPartnerReportDetailQuery(
     id ?? "",
     {
@@ -79,23 +114,38 @@ export default function PartnerReportTreatment() {
     },
   );
 
+  // Mutation de mise à jour
   const [updateReport, { isLoading: isSaving }] =
     useUpdatePartnerReportMutation();
+
+  // Mutation de soumission
+  const [submitReport, { isLoading: isSubmitting }] =
+    useSubmitPartnerReportMutation();
 
   const report = data?.report;
   const summary = data?.financial_summary;
 
-  // Synchroniser les commentaires lorsque le rapport est chargé.
+  const isDraft = report?.status === "DRAFT";
+  const isBusy = isSaving || isSubmitting;
+
+  // Vérification temporaire
+  console.log("Report status:", report?.status);
+  console.log("Is draft:", isDraft);
+
+  // Synchronisation des commentaires
   useEffect(() => {
     if (report) {
       setComments(report.general_comments ?? "");
       setSaveError(null);
       setSaveSuccess(false);
+      setSubmitError(null);
+      setSubmitSuccess(false);
     }
   }, [report?.id, report?.general_comments]);
 
-  const handleSave = async () => {
-    if (!report || report.status !== "DRAFT" || isSaving) {
+  // Enregistrement du brouillon
+  const handleSaveDraft = async () => {
+    if (!report || !isDraft || isBusy) {
       return;
     }
 
@@ -108,18 +158,115 @@ export default function PartnerReportTreatment() {
         general_comments: comments,
       }).unwrap();
 
+      setIsDraftSaved(true);
+      setIsReportSaved(false);
       setSaveSuccess(true);
+
       await refetch();
     } catch (error) {
-      console.error("Erreur lors de l'enregistrement du rapport :", error);
+      console.error("Erreur lors de l'enregistrement du brouillon :", error);
 
       setSaveError(
-        "Impossible d'enregistrer les commentaires. Vérifiez votre connexion et vos autorisations, puis réessayez.",
+        "Impossible d'enregistrer le brouillon. Vérifiez votre connexion et vos autorisations.",
       );
     }
   };
 
-  // Les retours conditionnels sont placés après tous les Hooks.
+  const handleSaveReport = async () => {
+    if (!report || !isDraft || isBusy) {
+      return;
+    }
+
+    if (!hasAllRequiredDocuments) {
+      setSaveError(
+        "Veuillez ajouter toutes les pièces justificatives obligatoires.",
+      );
+      return;
+    }
+
+    setSaveError(null);
+    setSaveSuccess(false);
+
+    try {
+      // Enregistrer les commentaires généraux.
+      await updateReport({
+        id: report.id,
+        general_comments: comments,
+      }).unwrap();
+
+      setIsReportSaved(true);
+      setSaveSuccess(true);
+
+      await refetch();
+    } catch (error) {
+      console.error("Erreur lors de l'enregistrement du rapport :", error);
+
+      setIsReportSaved(false);
+
+      setSaveError(
+        "Impossible d'enregistrer le rapport. Vérifiez les données et réessayez.",
+      );
+    }
+  };
+
+  // Soumission du rapport
+  const handleSubmit = async () => {
+    if (!report || !isDraft || isBusy) {
+      return false;
+    }
+
+    setSubmitError(null);
+    setSubmitSuccess(false);
+
+    try {
+      await submitReport({
+        id: report.id,
+        general_comments: comments.trim() || null,
+      }).unwrap();
+
+      setSubmitSuccess(true);
+      setConfirmSubmitOpen(false);
+
+      await refetch();
+
+      return true;
+    } catch (error) {
+      console.error("Erreur complète lors de la soumission :", error);
+
+      const apiError = error as {
+        status?: number | string;
+        data?: {
+          message?: string;
+          detail?: string;
+          error?: string;
+          errors?: Record<string, string>;
+          title?: string;
+        };
+      };
+
+      const backendMessage =
+        apiError?.data?.message ??
+        apiError?.data?.detail ??
+        apiError?.data?.error ??
+        apiError?.data?.title;
+
+      const validationErrors = apiError?.data?.errors;
+
+      const message = validationErrors
+        ? Object.entries(validationErrors)
+            .map(([field, message]) => `${field} : ${message}`)
+            .join("\n")
+        : (backendMessage ??
+          `Échec de la soumission (HTTP ${apiError?.status ?? "inconnu"}). Consultez les logs du serveur.`);
+
+      setSubmitError(message);
+      setConfirmSubmitOpen(false);
+
+      return false;
+    }
+  };
+
+  // Retours conditionnels après les Hooks
   if (!id) {
     return (
       <Box sx={{ p: 3 }}>
@@ -177,14 +324,12 @@ export default function PartnerReportTreatment() {
     );
   }
 
-  const isDraft = report.status === "DRAFT";
-
   return (
     <Box sx={{ p: { xs: 2, md: 3 } }}>
       {/* En-tête */}
       <Stack
+        direction={{ xs: "column", sm: "row" }}
         sx={{
-          direction: { xs: "column", sm: "row" },
           justifyContent: "space-between",
           alignItems: { xs: "stretch", sm: "center" },
           spacing: 2,
@@ -215,221 +360,390 @@ export default function PartnerReportTreatment() {
           </Typography>
         </Box>
 
-        <Chip
-          label={statusLabels[report.status] ?? report.status}
-          color={isDraft ? "warning" : "info"}
-          variant="outlined"
-        />
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          sx={{
+            spacing: 2,
+            alignItems: { xs: "stretch", sm: "center" },
+          }}
+        >
+          <Chip
+            label={statusLabels[report.status] ?? report.status}
+            color={isDraft ? "warning" : "info"}
+            variant="outlined"
+          />
+        </Stack>
       </Stack>
+
+      {/* Notifications */}
+      {submitError && (
+        <Alert
+          severity="error"
+          sx={{ mb: 3 }}
+          onClose={() => setSubmitError(null)}
+        >
+          {submitError}
+        </Alert>
+      )}
+
+      {submitSuccess && (
+        <Alert severity="success" sx={{ mb: 3 }}>
+          Votre rapport a été soumis avec succès.
+        </Alert>
+      )}
+
+      {saveError && (
+        <Alert
+          severity="error"
+          sx={{ mb: 3 }}
+          onClose={() => setSaveError(null)}
+        >
+          {saveError}
+        </Alert>
+      )}
+
+      {saveSuccess && (
+        <Alert
+          severity="success"
+          sx={{ mb: 3 }}
+          onClose={() => setSaveSuccess(false)}
+        >
+          Les commentaires ont été enregistrés.
+        </Alert>
+      )}
 
       {!isDraft && (
         <Alert severity="info" sx={{ mb: 3 }}>
-          Ce rapport n’est plus en brouillon. Les modifications peuvent être
-          limitées par les règles du workflow.
+          Ce rapport n’est plus en brouillon. Les modifications ne sont plus
+          autorisées à ce stade du workflow.
         </Alert>
       )}
 
       {/* Informations générales */}
-      <Card variant="outlined" sx={{ mb: 3 }}>
-        <CardContent>
-          <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
-            Informations générales
-          </Typography>
+      <Box sx={{ mb: 3 }}>
+        <CommonCard>
+          <CardContent>
+            <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+              Informations générales
+            </Typography>
 
-          <Grid container spacing={2}>
-            <Grid size={{ xs: 12, md: 6 }}>
-              <Typography color="text.secondary" variant="body2">
-                Identifiant du rapport
-              </Typography>
+            <Grid container spacing={2}>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <Typography color="text.secondary" variant="body2">
+                  Identifiant du rapport
+                </Typography>
 
-              <Typography sx={{ overflowWrap: "anywhere" }}>
-                {report.id}
-              </Typography>
+                <Typography sx={{ overflowWrap: "anywhere" }}>
+                  {report.id}
+                </Typography>
+              </Grid>
+
+              <Grid size={{ xs: 12, md: 6 }}>
+                <Typography color="text.secondary" variant="body2">
+                  Calendrier de décaissement
+                </Typography>
+
+                <Typography sx={{ overflowWrap: "anywhere" }}>
+                  {report.disbursement_schedule_id ?? "Non renseigné"}
+                </Typography>
+              </Grid>
+
+              <Grid size={{ xs: 12, md: 6 }}>
+                <Typography color="text.secondary" variant="body2">
+                  Créé le
+                </Typography>
+
+                <Typography>{formatDate(report.created_at)}</Typography>
+              </Grid>
+
+              <Grid size={{ xs: 12, md: 6 }}>
+                <Typography color="text.secondary" variant="body2">
+                  Dernière modification
+                </Typography>
+
+                <Typography>{formatDate(report.updated_at)}</Typography>
+              </Grid>
             </Grid>
-
-            <Grid size={{ xs: 12, md: 6 }}>
-              <Typography color="text.secondary" variant="body2">
-                Calendrier de décaissement
-              </Typography>
-
-              <Typography sx={{ overflowWrap: "anywhere" }}>
-                {report.disbursement_schedule_id ?? "Non renseigné"}
-              </Typography>
-            </Grid>
-
-            <Grid size={{ xs: 12, md: 6 }}>
-              <Typography color="text.secondary" variant="body2">
-                Créé le
-              </Typography>
-
-              <Typography>{formatDate(report.created_at)}</Typography>
-            </Grid>
-
-            <Grid size={{ xs: 12, md: 6 }}>
-              <Typography color="text.secondary" variant="body2">
-                Dernière modification
-              </Typography>
-
-              <Typography>{formatDate(report.updated_at)}</Typography>
-            </Grid>
-          </Grid>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </CommonCard>
+      </Box>
 
       {/* Contenu du rapport */}
-      <Card variant="outlined">
-        <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-          <Tabs
-            value={tab}
-            onChange={(_, value: number) => setTab(value)}
-            variant="scrollable"
-            scrollButtons="auto"
-            allowScrollButtonsMobile
-          >
-            <Tab label="Commentaires" />
-            <Tab label="Rapport technique" />
-            <Tab label="Rapport financier" />
-            <Tab label="Justificatifs" />
-          </Tabs>
-        </Box>
+      <Box>
+        <CommonCard>
+          <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+            <Tabs
+              value={tab}
+              onChange={(_, value: number) => setTab(value)}
+              variant="scrollable"
+              scrollButtons="auto"
+              allowScrollButtonsMobile
+              sx={{
+                "& .MuiTab-root": {
+                  color: colors.grey[300],
+                  fontWeight: 600,
+                  textTransform: "none",
+                  minHeight: 48,
+                  transition: "all 0.2s ease",
+                },
+                "& .MuiTab-root.Mui-selected": {
+                  color: colors.bluePrimary[500],
+                  fontWeight: 700,
+                },
+                "& .MuiTabs-indicator": {
+                  backgroundColor: colors.bluePrimary[500],
+                  height: 3,
+                  borderRadius: "3px 3px 0 0",
+                },
+              }}
+            >
+              <Tab label="COMMENTAIRES" />
+              <Tab label="RAPPORT TECHNIQUE" />
+              <Tab label="RAPPORT FINANCIER" />
+              <Tab label="JUSTIFICATIFS" />
+            </Tabs>
+          </Box>
 
-        <CardContent>
-          {/* Onglet 1 : Commentaires */}
-          {tab === 0 && (
-            <Stack spacing={2}>
-              <Typography variant="h6">Observations générales</Typography>
+          <CardContent>
+            {/* Onglet 1 : Commentaires */}
+            {tab === 0 && (
+              <Stack spacing={2}>
+                <Typography variant="h6">Observations générales</Typography>
 
-              {saveError && (
-                <Alert severity="error" onClose={() => setSaveError(null)}>
-                  {saveError}
-                </Alert>
-              )}
+                <TextField
+                  label="Commentaires du partenaire"
+                  value={comments}
+                  onChange={(event) => {
+                    setComments(event.target.value);
+                    setSaveSuccess(false);
+                    setSaveError(null);
+                  }}
+                  fullWidth
+                  multiline
+                  minRows={5}
+                  disabled={!isDraft || isBusy}
+                  placeholder="Décrivez les résultats, les difficultés rencontrées ou les observations utiles..."
+                />
 
-              {saveSuccess && (
-                <Alert severity="success" onClose={() => setSaveSuccess(false)}>
-                  Les commentaires ont été enregistrés.
-                </Alert>
-              )}
+                <Box>
+                  <Button
+                    variant="contained"
+                    startIcon={
+                      isSaving ? (
+                        <CircularProgress size={18} color="inherit" />
+                      ) : (
+                        <SaveIcon />
+                      )
+                    }
+                    onClick={() => void handleSaveDraft()}
+                    disabled={!isDraft || isBusy}
+                  >
+                    {isSaving
+                      ? "Enregistrement..."
+                      : "Enregistrer le brouillon"}
+                  </Button>
+                </Box>
+              </Stack>
+            )}
 
-              <TextField
-                label="Commentaires du partenaire"
-                value={comments}
-                onChange={(event) => {
-                  setComments(event.target.value);
-                  setSaveSuccess(false);
-                  setSaveError(null);
+            {/* Onglet 2 : Rapport technique */}
+            {tab === 1 && (
+              <Stack spacing={2}>
+                <TechnicalReportSection
+                  reportId={report.id}
+                  scheduleId={report.disbursement_schedule_id}
+                  readOnly={!isDraft || isBusy}
+                />
+              </Stack>
+            )}
+
+            {/* Onglet 3 : Rapport financier */}
+            {tab === 2 && (
+              <Stack spacing={2}>
+                <Typography variant="h6">Synthèse financière</Typography>
+
+                {!summary || Object.keys(summary).length === 0 ? (
+                  <Alert severity="info">
+                    Aucune synthèse financière disponible pour ce rapport.
+                  </Alert>
+                ) : (
+                  <Grid container spacing={2}>
+                    {Object.entries(summary).map(([key, value]) => (
+                      <Grid key={key} size={{ xs: 12, sm: 6, md: 4 }}>
+                        <CommonCard sx={{ height: "100%" }}>
+                          <CardContent>
+                            <Typography
+                              variant="body2"
+                              color="text.secondary"
+                              sx={{ textTransform: "capitalize" }}
+                            >
+                              {key.replaceAll("_", " ")}
+                            </Typography>
+
+                            <Typography
+                              variant="h6"
+                              sx={{
+                                mt: 1,
+                                overflowWrap: "anywhere",
+                              }}
+                            >
+                              {typeof value === "number"
+                                ? formatAmount(value)
+                                : value === null
+                                  ? "—"
+                                  : typeof value === "string" &&
+                                      value.trim() !== "" &&
+                                      Number.isFinite(Number(value))
+                                    ? formatAmount(value)
+                                    : String(value)}
+                            </Typography>
+                          </CardContent>
+                        </CommonCard>
+                      </Grid>
+                    ))}
+                  </Grid>
+                )}
+
+                <Divider />
+
+                <FinancialReportSection
+                  reportId={report.id}
+                  readOnly={!isDraft || isBusy}
+                />
+              </Stack>
+            )}
+
+            {/* Onglet 4 : Justificatifs */}
+            {tab === 3 && (
+              <Stack spacing={2}>
+                <Typography variant="h6">Pièces justificatives</Typography>
+
+                <Typography variant="body2" color="text.secondary">
+                  Ajoutez les documents généraux qui justifient le rapport :
+                  courriers, rapports complémentaires, photos ou autres pièces.
+                </Typography>
+
+                <GeneralReportAttachments
+                  reportId={report.id}
+                  readOnly={!isDraft || isBusy}
+                  onRequiredDocumentsChange={setHasAllRequiredDocuments}
+                />
+              </Stack>
+            )}
+          </CardContent>
+        </CommonCard>
+      </Box>
+      <Box sx={{ mt: 3 }}>
+        <CommonCard>
+          <CardContent>
+            {isDraft && (
+              <Stack
+                direction={{ xs: "column", sm: "row" }}
+                sx={{
+                  spacing: 2,
+                  justifyContent: "flex-end",
+                  alignItems: { xs: "stretch", sm: "center" },
                 }}
-                fullWidth
-                multiline
-                minRows={5}
-                disabled={!isDraft || isSaving}
-                placeholder="Décrivez les résultats, les difficultés rencontrées ou les observations utiles..."
-              />
+              >
+                <Box sx={{ mr: 1 }}>
+                  <CommonGreyButton
+                    variant="outlined"
+                    startIcon={
+                      isSaving ? (
+                        <CircularProgress size={18} color="inherit" />
+                      ) : (
+                        <SaveIcon />
+                      )
+                    }
+                    onClick={() => void handleSaveReport()}
+                    disabled={
+                      !isDraftSaved || !hasAllRequiredDocuments || isBusy
+                    }
+                  >
+                    {isSaving ? "Enregistrement..." : "Enregistrer"}
+                  </CommonGreyButton>
+                </Box>
 
-              <Box>
-                <Button
-                  variant="contained"
-                  startIcon={
-                    isSaving ? (
-                      <CircularProgress size={18} color="inherit" />
-                    ) : (
-                      <SaveIcon />
-                    )
-                  }
-                  onClick={() => void handleSave()}
-                  disabled={!isDraft || isSaving}
-                >
-                  {isSaving ? "Enregistrement..." : "Enregistrer le brouillon"}
-                </Button>
-              </Box>
-            </Stack>
-          )}
+                <Box sx={{ ml: 1 }}>
+                  <CommonBlueButton
+                    variant="contained"
+                    startIcon={
+                      isSubmitting ? (
+                        <CircularProgress size={18} color="inherit" />
+                      ) : (
+                        <SendIcon />
+                      )
+                    }
+                    onClick={() => setConfirmSubmitOpen(true)}
+                    disabled={
+                      !isReportSaved || !hasAllRequiredDocuments || isBusy
+                    }
+                  >
+                    Soumettre le rapport
+                  </CommonBlueButton>
+                </Box>
+              </Stack>
+            )}
+          </CardContent>
+        </CommonCard>
+      </Box>
 
-          {/* Onglet 2 : Rapport technique */}
-          {tab === 1 && (
-            <Stack spacing={2}>
-              <Typography variant="h6">Rapport technique</Typography>
+      {/* Dialogue de confirmation */}
+      <Dialog
+        open={confirmSubmitOpen}
+        onClose={() => {
+          if (!isSubmitting) {
+            setConfirmSubmitOpen(false);
+          }
+        }}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Confirmer la soumission du rapport</DialogTitle>
 
-              <Alert severity="info">
-                Les activités prévues, les résultats obtenus et les preuves
-                doivent être chargés depuis les endpoints techniques du backend.
-                Ils ne figurent pas dans le type PartnerReportWithSummary
-                actuellement fourni.
-              </Alert>
-            </Stack>
-          )}
+        <DialogContent>
+          <DialogContentText>
+            Vous êtes sur le point de soumettre votre rapport partenaire pour
+            vérification.
+            {"\n\n"}
+            Avant de continuer, assurez-vous que les informations techniques,
+            financières et les pièces justificatives sont complètes.
+            {"\n\n"}
+            Après la soumission, vous ne pourrez plus modifier directement les
+            informations tant que le rapport ne sera pas retourné pour
+            correction.
+            {"\n\n"}
+            Voulez-vous continuer ?
+          </DialogContentText>
+        </DialogContent>
 
-          {/* Onglet 3 : Rapport financier */}
-          {tab === 2 && (
-            <Stack spacing={2}>
-              <Typography variant="h6">Synthèse financière</Typography>
+        <DialogActions sx={{ p: 2 }}>
+          <Button
+            onClick={() => setConfirmSubmitOpen(false)}
+            disabled={isSubmitting}
+          >
+            Annuler
+          </Button>
 
-              {!summary || Object.keys(summary).length === 0 ? (
-                <Alert severity="info">
-                  Aucune synthèse financière disponible pour ce rapport.
-                </Alert>
+          <Button
+            variant="contained"
+            color="success"
+            startIcon={
+              isSubmitting ? (
+                <CircularProgress size={18} color="inherit" />
               ) : (
-                <Grid container spacing={2}>
-                  {Object.entries(summary).map(([key, value]) => (
-                    <Grid key={key} size={{ xs: 12, sm: 6, md: 4 }}>
-                      <Card variant="outlined" sx={{ height: "100%" }}>
-                        <CardContent>
-                          <Typography
-                            variant="body2"
-                            color="text.secondary"
-                            sx={{ textTransform: "capitalize" }}
-                          >
-                            {key.replaceAll("_", " ")}
-                          </Typography>
-
-                          <Typography
-                            variant="h6"
-                            sx={{
-                              mt: 1,
-                              overflowWrap: "anywhere",
-                            }}
-                          >
-                            {typeof value === "number"
-                              ? formatAmount(value)
-                              : value === null
-                                ? "—"
-                                : typeof value === "string" &&
-                                    value.trim() !== "" &&
-                                    Number.isFinite(Number(value))
-                                  ? formatAmount(value)
-                                  : String(value)}
-                          </Typography>
-                        </CardContent>
-                      </Card>
-                    </Grid>
-                  ))}
-                </Grid>
-              )}
-
-              <Divider />
-
-              <Alert severity="info">
-                La saisie des dépenses et le calcul du solde nécessitent les
-                endpoints des lignes financières. Les montants calculés devront
-                être validés côté serveur.
-              </Alert>
-            </Stack>
-          )}
-
-          {/* Onglet 4 : Justificatifs */}
-          {tab === 3 && (
-            <Stack spacing={2}>
-              <Typography variant="h6">Pièces justificatives</Typography>
-
-              <Alert severity="info">
-                L’ajout, le téléchargement et la suppression des justificatifs
-                seront raccordés aux endpoints de gestion des pièces jointes du
-                backend.
-              </Alert>
-            </Stack>
-          )}
-        </CardContent>
-      </Card>
+                <SendIcon />
+              )
+            }
+            onClick={() => void handleSubmit()}
+            disabled={isSubmitting || isSaving}
+          >
+            {isSubmitting
+              ? "Soumission en cours..."
+              : "Confirmer la soumission"}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

@@ -13,7 +13,6 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableHead,
   TableRow,
   Tooltip,
   Typography,
@@ -45,6 +44,7 @@ import { formatCents, toCents } from "@/features/project/budget";
 import { statusMeta } from "@/features/project/projectStatus";
 
 import type { RootState } from "@/app/store";
+import CommonTableHead from "@/components/CommonTableHead";
 
 export default function ProjectList() {
   const navigate = useNavigate();
@@ -164,28 +164,17 @@ export default function ProjectList() {
           {isFetching && <LinearProgress />}
 
           <Table size="small">
-            <TableHead>
-              <TableRow>
-                <TableCell sx={{ fontWeight: 600 }}>Convention</TableCell>
-
-                <TableCell sx={{ fontWeight: 600 }}>Projet</TableCell>
-
-                <TableCell sx={{ fontWeight: 600 }}>
-                  Partenaire d'appui
-                </TableCell>
-
-                <TableCell sx={{ fontWeight: 600 }}>Date d'octroi</TableCell>
-
-                <TableCell sx={{ fontWeight: 600 }}>Budget</TableCell>
-
-                <TableCell sx={{ fontWeight: 600 }}>Statut</TableCell>
-
-                <TableCell align="right" sx={{ fontWeight: 600 }}>
-                  Actions
-                </TableCell>
-              </TableRow>
-            </TableHead>
-
+            <CommonTableHead
+              columns={[
+                { label: "Convention" },
+                { label: "Projet" },
+                { label: "Partenaire d'appui" },
+                { label: "Date d'octroi" },
+                { label: "Budget" },
+                { label: "Statut" },
+                { label: "Actions", align: "right", width: 100 },
+              ]}
+            />
             <TableBody>
               {!user && (
                 <TableRow>
