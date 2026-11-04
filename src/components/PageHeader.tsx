@@ -1,5 +1,6 @@
-import { Button, Stack, Typography } from "@mui/material";
+import { Stack, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
+import CommonBlueButton from "./CommonBlueButton";
 
 interface Props {
   title: string;
@@ -24,9 +25,14 @@ export default function PageHeader({ title, addLabel, onAdd }: Props) {
       </Typography>
 
       {showAddButton && (
-        <Button variant="contained" startIcon={<AddIcon />} onClick={onAdd}>
+        <CommonBlueButton
+          size="small"
+          variant="outlined"
+          startIcon={<AddIcon />}
+          onClick={onAdd}
+        >
           {addLabel}
-        </Button>
+        </CommonBlueButton>
       )}
     </Stack>
   );

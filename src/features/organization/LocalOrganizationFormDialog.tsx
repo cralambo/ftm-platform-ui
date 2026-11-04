@@ -2,8 +2,14 @@ import type { ReactNode } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import {
-  Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle,
-  Stack, TextField,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Stack,
+  TextField,
+  useTheme,
 } from "@mui/material";
 import { useNotify } from "@/hooks/useNotify";
 import { fieldProps } from "@/utils/formik";
@@ -12,13 +18,20 @@ import {
   useAddLocalOrganizationMutation,
   useUpdateLocalOrganizationMutation,
 } from "./localOrganizationApi";
-import type { LocalOrganization, LocalOrganizationInput } from "./localOrganization.types";
+import type {
+  LocalOrganization,
+  LocalOrganizationInput,
+} from "./localOrganization.types";
+import { tokens } from "@/theme";
+import CommonGreyButton from "@/components/CommonGreyButton";
+import CommonBlueButton from "@/components/CommonBlueButton";
 
 const schema = Yup.object({
-  name: Yup.string().trim().required("Nom obligatoire").max(100, "100 caractères max"),
-  email: Yup.string()
+  name: Yup.string()
     .trim()
-    .email("Adresse e-mail invalide"),
+    .required("Nom obligatoire")
+    .max(100, "100 caractères max"),
+  email: Yup.string().trim().email("Adresse e-mail invalide"),
   phone: Yup.string()
     .trim()
     .matches(/^[0-9+()\s.-]*$/, "Numéro de téléphone invalide")
@@ -40,7 +53,12 @@ interface Props {
   onClose: () => void;
 }
 
-export default function LocalOrganizationFormDialog({ localOrganization, onClose }: Props) {
+export default function LocalOrganizationFormDialog({
+  localOrganization,
+  onClose,
+}: Props) {
+  const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
   const [addLocalOrganization] = useAddLocalOrganizationMutation();
   const [updateLocalOrganization] = useUpdateLocalOrganizationMutation();
   const notify = useNotify();
@@ -50,14 +68,20 @@ export default function LocalOrganizationFormDialog({ localOrganization, onClose
       name: localOrganization?.name ?? "",
       address: localOrganization?.address ?? "",
       phone: localOrganization?.phone ?? "",
-      email: localOrganization?.email ?? ""
+      email: localOrganization?.email ?? "",
     },
     validationSchema: schema,
     onSubmit: async (values) => {
       try {
-        if (localOrganization) await updateLocalOrganization({ id: localOrganization.id, ...values }).unwrap();
+        if (localOrganization)
+          await updateLocalOrganization({
+            id: localOrganization.id,
+            ...values,
+          }).unwrap();
         else await addLocalOrganization(values).unwrap();
-        notify(localOrganization ? "Organisation modifié" : "Organisation ajouté");
+        notify(
+          localOrganization ? "Organisation modifié" : "Organisation ajouté",
+        );
         onClose();
       } catch (e) {
         notify(getErrorMessage(e), "error");
@@ -66,33 +90,73 @@ export default function LocalOrganizationFormDialog({ localOrganization, onClose
   });
 
   return (
-    <Dialog open onClose={formik.isSubmitting ? undefined : onClose} maxWidth="md" fullWidth>
+    <Dialog
+      open
+      onClose={formik.isSubmitting ? undefined : onClose}
+      maxWidth="md"
+      fullWidth
+      sx={[
+        {
+          "& .MuiDialog-paper": {
+            bgcolor:
+              theme.palette.mode === "light" ? "#ffffff" : colors.primary[600],
+            color: "text.primary",
+            backgroundImage: "none",
+            border: `1px solid ${theme.palette.divider}`,
+            borderRadius: 2,
+          },
+        },
+      ]}
+    >
       <form onSubmit={formik.handleSubmit} noValidate>
         <DialogTitle>
-          {localOrganization ? "Modifier l'organisation" : "Ajouter une organisation"}
+          {localOrganization
+            ? "Modifier l'organisation"
+            : "Ajouter une organisation"}
         </DialogTitle>
         <DialogContent sx={{ pt: "8px !important" }}>
-            <TextField label="Nom" {...fieldProps(formik, "name")} />
+          <TextField size="small" label="Nom" {...fieldProps(formik, "name")} />
           <Row>
             <TextField
               label="E-mail"
               type="email"
+              size="small"
               {...fieldProps(formik, "email")}
             />
-            <TextField label="Téléphone" type="tel" {...fieldProps(formik, "phone")} />
+            <TextField
+              label="Téléphone"
+              type="tel"
+              size="small"
+              {...fieldProps(formik, "phone")}
+            />
           </Row>
-          <TextField label="Adresse" {...fieldProps(formik, "address")} />
+          <TextField
+            size="small"
+            label="Adresse"
+            {...fieldProps(formik, "address")}
+          />
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button onClick={onClose} disabled={formik.isSubmitting}>Annuler</Button>
-          <Button
-            type="submit"
-            variant="contained"
+          <CommonGreyButton
+            onClick={onClose}
             disabled={formik.isSubmitting}
-            startIcon={formik.isSubmitting ? <CircularProgress size={16} color="inherit" /> : undefined}
+            size="small"
+          >
+            Annuler
+          </CommonGreyButton>
+          <CommonBlueButton
+            type="submit"
+            size="small"
+            variant="contained"
+            startIcon={
+              formik.isSubmitting ? (
+                <CircularProgress size={16} color="inherit" />
+              ) : undefined
+            }
+            disabled={formik.isSubmitting}
           >
             Enregistrer
-          </Button>
+          </CommonBlueButton>
         </DialogActions>
       </form>
     </Dialog>

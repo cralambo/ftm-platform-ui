@@ -9,7 +9,6 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableHead,
   TableRow,
   Tooltip,
   Typography,
@@ -29,6 +28,7 @@ import {
 import type { District } from "@/features/district/district.type";
 import CommonTablePagination from "@/components/CommonTablePagination";
 import CommonTable from "@/components/CommonTable";
+import CommonTableHead from "@/components/CommonTableHead";
 
 export default function DistrictList() {
   const { page, size, setPage, changeSize } = usePagination();
@@ -87,17 +87,14 @@ export default function DistrictList() {
           <CommonTable>
             {isFetching && <LinearProgress />}
             <Table size="small">
-              <TableHead>
-                <TableRow>
-                  <TableCell sx={{ fontWeight: 600 }}>Code</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Nom</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Région</TableCell>
-                  <TableCell align="right" sx={{ fontWeight: 600 }}>
-                    Actions
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-
+              <CommonTableHead
+                columns={[
+                  { label: "District" },
+                  { label: "Code district" },
+                  { label: "Région" },
+                  { label: "Actions", align: "right", width: 100 },
+                ]}
+              />
               <TableBody>
                 {districts.length === 0 && !isFetching && (
                   <TableRow>
@@ -111,8 +108,8 @@ export default function DistrictList() {
 
                 {districts.map((district) => (
                   <TableRow key={district.id} hover>
-                    <TableCell>{district.code}</TableCell>
                     <TableCell>{district.name}</TableCell>
+                    <TableCell>{district.code}</TableCell>
                     <TableCell>{district.region.name}</TableCell>
                     <TableCell align="right">
                       <Tooltip title="Modifier">

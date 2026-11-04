@@ -9,7 +9,6 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableHead,
   TableRow,
   Tooltip,
   Typography,
@@ -30,6 +29,7 @@ import {
 import type { StrategicPlan } from "@/features/strategicPlan/strategicPlan.types";
 import CommonTablePagination from "@/components/CommonTablePagination";
 import CommonTable from "@/components/CommonTable";
+import CommonTableHead from "@/components/CommonTableHead";
 
 export default function StrategicPlanList() {
   const { page, size, setPage, changeSize } = usePagination();
@@ -88,19 +88,16 @@ export default function StrategicPlanList() {
           <CommonTable>
             {isFetching && <LinearProgress />}
             <Table size="small">
-              <TableHead>
-                <TableRow>
-                  <TableCell sx={{ fontWeight: 600 }}>Code</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Nom</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Début</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Fin</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Description</TableCell>
-                  <TableCell align="right" sx={{ fontWeight: 600 }}>
-                    Actions
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-
+              <CommonTableHead
+                columns={[
+                  { label: "Code" },
+                  { label: "Nom" },
+                  { label: "Début" },
+                  { label: "FIn" },
+                  { label: "Description" },
+                  { label: "Actions", align: "right", width: 100 },
+                ]}
+              />
               <TableBody>
                 {plans.length === 0 && !isFetching && (
                   <TableRow>

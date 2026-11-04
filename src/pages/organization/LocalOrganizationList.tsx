@@ -9,7 +9,6 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableHead,
   TableRow,
   Tooltip,
   Typography,
@@ -29,6 +28,7 @@ import {
 import type { LocalOrganization } from "@/features/organization/localOrganization.types";
 import CommonTable from "@/components/CommonTable";
 import CommonTablePagination from "@/components/CommonTablePagination";
+import CommonTableHead from "@/components/CommonTableHead";
 
 export default function LocalOrganizationList() {
   const { page, size, setPage, changeSize } = usePagination();
@@ -87,18 +87,15 @@ export default function LocalOrganizationList() {
           <CommonTable>
             {isFetching && <LinearProgress />}
             <Table size="small">
-              <TableHead>
-                <TableRow>
-                  <TableCell sx={{ fontWeight: 600 }}>Nom</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>E-mail</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Téléphone</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Adresse</TableCell>
-                  <TableCell align="right" sx={{ fontWeight: 600 }}>
-                    Actions
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-
+              <CommonTableHead
+                columns={[
+                  { label: "Nom" },
+                  { label: "E-mail" },
+                  { label: "Téléphone" },
+                  { label: "Adresse" },
+                  { label: "Actions", align: "right", width: 100 },
+                ]}
+              />
               <TableBody>
                 {localOrganizations.length === 0 && !isFetching && (
                   <TableRow>

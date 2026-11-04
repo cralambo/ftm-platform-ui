@@ -19,10 +19,8 @@ const Layout = (): JSX.Element => {
           className="content"
           style={
             {
-              "--scroll-thumb":
-                theme.palette.mode === "dark"
-                  ? colors.blueAccent[600]
-                  : colors.blueAccent[400],
+              "--scroll-thumb": colors.bluePrimary[600],
+              "--scroll-thumb-hover": colors.bluePrimary[400],
               "--scroll-track":
                 theme.palette.mode === "dark" ? colors.primary[500] : "#f0f0f0",
             } as React.CSSProperties

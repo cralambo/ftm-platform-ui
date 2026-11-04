@@ -9,7 +9,6 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableHead,
   TableRow,
   Tooltip,
   Typography,
@@ -29,6 +28,7 @@ import type { SubLandscape } from "@/features/subLandscape/subLandscape.types";
 import SubLandscapeFormDialog from "@/features/subLandscape/SubLandscapeFormDialog";
 import CommonTable from "@/components/CommonTable";
 import CommonTablePagination from "@/components/CommonTablePagination";
+import CommonTableHead from "@/components/CommonTableHead";
 
 export default function SubLandscapeList() {
   const { page, size, setPage, changeSize } = usePagination();
@@ -88,16 +88,13 @@ export default function SubLandscapeList() {
           <CommonTable>
             {isFetching && <LinearProgress />}
             <Table size="small">
-              <TableHead>
-                <TableRow>
-                  <TableCell sx={{ fontWeight: 600 }}>Sous-paysage</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Paysage</TableCell>
-                  <TableCell align="right" sx={{ fontWeight: 600 }}>
-                    Actions
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-
+              <CommonTableHead
+                columns={[
+                  { label: "Sous-paysage" },
+                  { label: "Paysage" },
+                  { label: "Actions", align: "right", width: 100 },
+                ]}
+              />
               <TableBody>
                 {subLandscapes.length === 0 && !isFetching && (
                   <TableRow>
