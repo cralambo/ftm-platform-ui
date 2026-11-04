@@ -2,8 +2,15 @@ import type { ReactNode } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import {
-  Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle,
-  MenuItem, Stack, TextField,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  MenuItem,
+  Stack,
+  TextField,
+  useTheme,
 } from "@mui/material";
 import { useNotify } from "@/hooks/useNotify";
 import { fieldProps } from "@/utils/formik";
@@ -13,12 +20,24 @@ import {
   useAddPartnerContactMutation,
   useUpdatePartnerContactMutation,
 } from "./partnerContactApi";
-import type { PartnerContact, PartnerContactInput } from "./partnerContact.types";
+import type {
+  PartnerContact,
+  PartnerContactInput,
+} from "./partnerContact.types";
+import CommonGreyButton from "@/components/CommonGreyButton";
+import CommonBlueButton from "@/components/CommonBlueButton";
+import { tokens } from "@/theme";
 
 const schema = Yup.object({
   support_partner_id: Yup.string().required("Partenaire obligatoire"),
-  firstname: Yup.string().trim().required("Prénom obligatoire").max(100, "100 caractères max"),
-  lastname: Yup.string().trim().required("Nom obligatoire").max(100, "100 caractères max"),
+  firstname: Yup.string()
+    .trim()
+    .required("Prénom obligatoire")
+    .max(100, "100 caractères max"),
+  lastname: Yup.string()
+    .trim()
+    .required("Nom obligatoire")
+    .max(100, "100 caractères max"),
   email: Yup.string()
     .trim()
     .email("Adresse e-mail invalide")
@@ -45,7 +64,10 @@ interface Props {
 }
 
 export default function PartnerContactFormDialog({ contact, onClose }: Props) {
-  const { data: partners = [], isLoading: loadingPartners } = useGetAllSupportPartnersQuery();
+  const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
+  const { data: partners = [], isLoading: loadingPartners } =
+    useGetAllSupportPartnersQuery();
   const [addContact] = useAddPartnerContactMutation();
   const [updateContact] = useUpdatePartnerContactMutation();
   const notify = useNotify();
@@ -62,7 +84,8 @@ export default function PartnerContactFormDialog({ contact, onClose }: Props) {
     validationSchema: schema,
     onSubmit: async (values) => {
       try {
-        if (contact) await updateContact({ id: contact.id, ...values }).unwrap();
+        if (contact)
+          await updateContact({ id: contact.id, ...values }).unwrap();
         else await addContact(values).unwrap();
         notify(contact ? "Contact modifié" : "Contact ajouté");
         onClose();
@@ -73,12 +96,32 @@ export default function PartnerContactFormDialog({ contact, onClose }: Props) {
   });
 
   return (
-    <Dialog open onClose={formik.isSubmitting ? undefined : onClose} maxWidth="sm" fullWidth>
+    <Dialog
+      open
+      onClose={formik.isSubmitting ? undefined : onClose}
+      maxWidth="sm"
+      fullWidth
+      sx={[
+        {
+          "& .MuiDialog-paper": {
+            bgcolor:
+              theme.palette.mode === "light" ? "#ffffff" : colors.primary[600],
+            color: "text.primary",
+            backgroundImage: "none",
+            border: `1px solid ${theme.palette.divider}`,
+            borderRadius: 2,
+          },
+        },
+      ]}
+    >
       <form onSubmit={formik.handleSubmit} noValidate>
-        <DialogTitle>{contact ? "Modifier le contact" : "Ajouter un contact"}</DialogTitle>
+        <DialogTitle>
+          {contact ? "Modifier le contact" : "Ajouter un contact"}
+        </DialogTitle>
         <DialogContent sx={{ pt: "8px !important" }}>
           <TextField
             select
+            size="small"
             label="Partenaire"
             disabled={loadingPartners}
             {...fieldProps(formik, "support_partner_id")}
@@ -90,25 +133,59 @@ export default function PartnerContactFormDialog({ contact, onClose }: Props) {
             ))}
           </TextField>
           <Row>
-            <TextField label="Prénom" autoFocus {...fieldProps(formik, "firstname")} />
-            <TextField label="Nom" {...fieldProps(formik, "lastname")} />
+            <TextField
+              label="Prénom"
+              size="small"
+              autoFocus
+              {...fieldProps(formik, "firstname")}
+            />
+            <TextField
+              size="small"
+              label="Nom"
+              {...fieldProps(formik, "lastname")}
+            />
           </Row>
           <Row>
-            <TextField label="E-mail" type="email" {...fieldProps(formik, "email")} />
-            <TextField label="Téléphone" type="tel" {...fieldProps(formik, "phone")} />
+            <TextField
+              label="E-mail"
+              type="email"
+              size="small"
+              {...fieldProps(formik, "email")}
+            />
+            <TextField
+              label="Téléphone"
+              type="tel"
+              size="small"
+              {...fieldProps(formik, "phone")}
+            />
           </Row>
-          <TextField label="Adresse" {...fieldProps(formik, "address")} />
+          <TextField
+            size="small"
+            label="Adresse"
+            {...fieldProps(formik, "address")}
+          />
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button onClick={onClose} disabled={formik.isSubmitting}>Annuler</Button>
-          <Button
-            type="submit"
-            variant="contained"
+          <CommonGreyButton
+            onClick={onClose}
             disabled={formik.isSubmitting}
-            startIcon={formik.isSubmitting ? <CircularProgress size={16} color="inherit" /> : undefined}
+            size="small"
+          >
+            Annuler
+          </CommonGreyButton>
+          <CommonBlueButton
+            type="submit"
+            size="small"
+            variant="contained"
+            startIcon={
+              formik.isSubmitting ? (
+                <CircularProgress size={16} color="inherit" />
+              ) : undefined
+            }
+            disabled={formik.isSubmitting}
           >
             Enregistrer
-          </Button>
+          </CommonBlueButton>
         </DialogActions>
       </form>
     </Dialog>

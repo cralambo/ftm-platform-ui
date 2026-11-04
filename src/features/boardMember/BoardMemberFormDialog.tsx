@@ -2,8 +2,14 @@ import type { ReactNode } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import {
-  Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle,
-  Stack, TextField,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Stack,
+  TextField,
+  useTheme,
 } from "@mui/material";
 import { useNotify } from "@/hooks/useNotify";
 import { fieldProps } from "@/utils/formik";
@@ -13,10 +19,21 @@ import {
   useUpdateBoardMemberMutation,
 } from "./boardMemberApi";
 import type { BoardMember, BoardMemberInput } from "./boardMember.types";
+import CommonGreyButton from "@/components/CommonGreyButton";
+import CommonBlueButton from "@/components/CommonBlueButton";
+import { tokens } from "@/theme";
+import CommonDatePicker from "@/components/common/CommonDatePicker";
+import dayjs from "dayjs";
 
 const schema = Yup.object({
-  firstname: Yup.string().trim().required("Prénom obligatoire").max(100, "100 caractères max"),
-  lastname: Yup.string().trim().required("Nom obligatoire").max(100, "100 caractères max"),
+  firstname: Yup.string()
+    .trim()
+    .required("Prénom obligatoire")
+    .max(100, "100 caractères max"),
+  lastname: Yup.string()
+    .trim()
+    .required("Nom obligatoire")
+    .max(100, "100 caractères max"),
   professional_email: Yup.string()
     .trim()
     .email("Adresse e-mail invalide")
@@ -27,7 +44,10 @@ const schema = Yup.object({
     .matches(/^[0-9+()\s.-]*$/, "Numéro de téléphone invalide")
     .max(30, "30 caractères max"),
   address: Yup.string().max(255, "255 caractères max"),
-  position: Yup.string().trim().required("Poste obligatoire").max(100, "100 caractères max"),
+  position: Yup.string()
+    .trim()
+    .required("Poste obligatoire")
+    .max(100, "100 caractères max"),
   appointment_date: Yup.string().required("Date de nomination obligatoire"),
   end_date: Yup.string().test(
     "after-appointment",
@@ -36,7 +56,7 @@ const schema = Yup.object({
       const { appointment_date } = this.parent as { appointment_date?: string };
       // champ facultatif ; le format ISO (YYYY-MM-DD) se compare comme du texte
       return !value || !appointment_date || value >= appointment_date;
-    }
+    },
   ),
 });
 
@@ -55,6 +75,8 @@ interface Props {
 }
 
 export default function BoardMemberFormDialog({ member, onClose }: Props) {
+  const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
   const [addMember] = useAddBoardMemberMutation();
   const [updateMember] = useUpdateBoardMemberMutation();
   const notify = useNotify();
@@ -85,58 +107,119 @@ export default function BoardMemberFormDialog({ member, onClose }: Props) {
   });
 
   return (
-    <Dialog open onClose={formik.isSubmitting ? undefined : onClose} maxWidth="md" fullWidth>
+    <Dialog
+      open
+      onClose={formik.isSubmitting ? undefined : onClose}
+      maxWidth="md"
+      fullWidth
+      sx={[
+        {
+          "& .MuiDialog-paper": {
+            bgcolor:
+              theme.palette.mode === "light" ? "#ffffff" : colors.primary[600],
+            color: "text.primary",
+            backgroundImage: "none",
+            border: `1px solid ${theme.palette.divider}`,
+            borderRadius: 2,
+          },
+        },
+      ]}
+    >
       <form onSubmit={formik.handleSubmit} noValidate>
         <DialogTitle>
-          {member ? "Modifier le membre du conseil" : "Ajouter un membre du conseil"}
+          {member
+            ? "Modifier le membre du conseil"
+            : "Ajouter un membre du conseil"}
         </DialogTitle>
         <DialogContent sx={{ pt: "8px !important" }}>
           <Row>
-            <TextField label="Prénom" autoFocus {...fieldProps(formik, "firstname")} />
-            <TextField label="Nom" {...fieldProps(formik, "lastname")} />
+            <TextField
+              label="Prénom"
+              size="small"
+              autoFocus
+              {...fieldProps(formik, "firstname")}
+            />
+            <TextField
+              size="small"
+              label="Nom"
+              {...fieldProps(formik, "lastname")}
+            />
           </Row>
           <Row>
             <TextField
               label="E-mail professionnel"
               type="email"
+              size="small"
               {...fieldProps(formik, "professional_email")}
             />
             <TextField
               label="E-mail personnel"
               type="email"
+              size="small"
               {...fieldProps(formik, "personal_email")}
             />
           </Row>
           <Row>
-            <TextField label="Téléphone" type="tel" {...fieldProps(formik, "phone")} />
-            <TextField label="Poste" {...fieldProps(formik, "position")} />
-          </Row>
-          <TextField label="Adresse" {...fieldProps(formik, "address")} />
-          <Row>
             <TextField
-              label="Date de nomination"
-              type="date"
-              {...fieldProps(formik, "appointment_date")}
-              slotProps={{ inputLabel: { shrink: true } }}
+              label="Téléphone"
+              type="tel"
+              size="small"
+              {...fieldProps(formik, "phone")}
             />
             <TextField
-              label="Date de fin (facultative)"
-              type="date"
-              {...fieldProps(formik, "end_date")}
-              slotProps={{ inputLabel: { shrink: true } }}
+              size="small"
+              label="Poste"
+              {...fieldProps(formik, "position")}
+            />
+          </Row>
+          <TextField
+            size="small"
+            label="Adresse"
+            {...fieldProps(formik, "address")}
+          />
+          <Row>
+            <CommonDatePicker
+              label="Date de nomination"
+              name="appointment_date"
+              value={formik.values.appointment_date}
+              onChange={(value) =>
+                formik.setFieldValue("appointment_date", value)
+              }
+              onBlur={() => formik.setFieldTouched("appointment_date", true)}
+            />
+            <CommonDatePicker
+              label="Date de fin"
+              value={formik.values.end_date}
+              onChange={(value) => formik.setFieldValue("end_date", value)}
+              minDate={
+                formik.values.appointment_date
+                  ? dayjs(formik.values.appointment_date)
+                  : undefined
+              }
             />
           </Row>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button onClick={onClose} disabled={formik.isSubmitting}>Annuler</Button>
-          <Button
-            type="submit"
-            variant="contained"
+          <CommonGreyButton
+            onClick={onClose}
             disabled={formik.isSubmitting}
-            startIcon={formik.isSubmitting ? <CircularProgress size={16} color="inherit" /> : undefined}
+            size="small"
+          >
+            Annuler
+          </CommonGreyButton>
+          <CommonBlueButton
+            type="submit"
+            size="small"
+            variant="contained"
+            startIcon={
+              formik.isSubmitting ? (
+                <CircularProgress size={16} color="inherit" />
+              ) : undefined
+            }
+            disabled={formik.isSubmitting}
           >
             Enregistrer
-          </Button>
+          </CommonBlueButton>
         </DialogActions>
       </form>
     </Dialog>

@@ -9,7 +9,6 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableHead,
   TableRow,
   Tooltip,
   Typography,
@@ -30,6 +29,7 @@ import {
 import type { BoardMember } from "@/features/boardMember/boardMember.types";
 import CommonTable from "@/components/CommonTable";
 import CommonTablePagination from "@/components/CommonTablePagination";
+import CommonTableHead from "@/components/CommonTableHead";
 
 export default function BoardMemberList() {
   const { page, size, setPage, changeSize } = usePagination();
@@ -88,22 +88,17 @@ export default function BoardMemberList() {
           <CommonTable>
             {isFetching && <LinearProgress />}
             <Table size="small">
-              <TableHead>
-                <TableRow>
-                  <TableCell sx={{ fontWeight: 600 }}>Nom</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Poste</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>
-                    E-mail professionnel
-                  </TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Téléphone</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Nomination</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Fin</TableCell>
-                  <TableCell align="right" sx={{ fontWeight: 600 }}>
-                    Actions
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-
+              <CommonTableHead
+                columns={[
+                  { label: "Nom" },
+                  { label: "Poste" },
+                  { label: "E-mail professionnel" },
+                  { label: "Téléphone" },
+                  { label: "Nomination" },
+                  { label: "Fin" },
+                  { label: "Actions", align: "right", width: 100 },
+                ]}
+              />
               <TableBody>
                 {members.length === 0 && !isFetching && (
                   <TableRow>

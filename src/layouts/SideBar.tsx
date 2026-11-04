@@ -151,20 +151,14 @@ const SideBar = () => {
           borderRadius: "10px",
         },
 
-        "--scroll-thumb":
-          theme.palette.mode === "dark"
-            ? colors.blueAccent[600]
-            : colors.blueAccent[400],
+        "--scroll-thumb": colors.bluePrimary[600],
 
-        "--scroll-thumb-hover":
-          theme.palette.mode === "dark"
-            ? colors.blueAccent[500]
-            : colors.blueAccent[300],
+        "--scroll-thumb-hover": colors.bluePrimary[400],
 
         "--scroll-track":
           theme.palette.mode === "dark"
             ? colors.primary[500]
-            : colors.grey[100],
+            : colors.bluePrimary[100],
 
         overflowY: "auto",
 

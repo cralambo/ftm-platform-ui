@@ -4,7 +4,7 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        VITE_API_URL: ${VITE_API_URL:-http://192.168.88.64:8095/api/v1}
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:8095/api/v1}
     image: ftm-platform-ui-react:latest
     container_name: ftm-platform-ui
     ports:

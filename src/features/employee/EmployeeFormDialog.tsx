@@ -2,20 +2,40 @@ import type { ReactNode } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import {
-  Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle,
-  MenuItem, Stack, TextField,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  MenuItem,
+  Stack,
+  TextField,
+  useTheme,
 } from "@mui/material";
 import { useNotify } from "@/hooks/useNotify";
 import { fieldProps } from "@/utils/formik";
 import { getErrorMessage } from "@/utils/errors";
 import { useGetAllDepartmentsQuery } from "@/features/department/departmentApi";
 import { useGetAllPositionsQuery } from "@/features/position/positionApi";
-import { useAddEmployeeMutation, useUpdateEmployeeMutation } from "./employeeApi";
+import {
+  useAddEmployeeMutation,
+  useUpdateEmployeeMutation,
+} from "./employeeApi";
 import type { Employee, EmployeeInput } from "./employee.types";
+import CommonGreyButton from "@/components/CommonGreyButton";
+import CommonBlueButton from "@/components/CommonBlueButton";
+import { tokens } from "@/theme";
+import CommonDatePicker from "@/components/common/CommonDatePicker";
 
 const schema = Yup.object({
-  firstname: Yup.string().trim().required("Prénom obligatoire").max(100, "100 caractères max"),
-  lastname: Yup.string().trim().required("Nom obligatoire").max(100, "100 caractères max"),
+  firstname: Yup.string()
+    .trim()
+    .required("Prénom obligatoire")
+    .max(100, "100 caractères max"),
+  lastname: Yup.string()
+    .trim()
+    .required("Nom obligatoire")
+    .max(100, "100 caractères max"),
   employee_number: Yup.string()
     .trim()
     .required("Numéro d'employé obligatoire")
@@ -51,8 +71,12 @@ interface Props {
 }
 
 export default function EmployeeFormDialog({ employee, onClose }: Props) {
-  const { data: departments = [], isLoading: loadingDepartments } = useGetAllDepartmentsQuery();
-  const { data: positions = [], isLoading: loadingPositions } = useGetAllPositionsQuery();
+  const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
+  const { data: departments = [], isLoading: loadingDepartments } =
+    useGetAllDepartmentsQuery();
+  const { data: positions = [], isLoading: loadingPositions } =
+    useGetAllPositionsQuery();
   const [addEmployee] = useAddEmployeeMutation();
   const [updateEmployee] = useUpdateEmployeeMutation();
   const notify = useNotify();
@@ -74,7 +98,8 @@ export default function EmployeeFormDialog({ employee, onClose }: Props) {
     validationSchema: schema,
     onSubmit: async (values) => {
       try {
-        if (employee) await updateEmployee({ id: employee.id, ...values }).unwrap();
+        if (employee)
+          await updateEmployee({ id: employee.id, ...values }).unwrap();
         else await addEmployee(values).unwrap();
         notify(employee ? "Employé modifié" : "Employé ajouté");
         onClose();
@@ -85,21 +110,58 @@ export default function EmployeeFormDialog({ employee, onClose }: Props) {
   });
 
   return (
-    <Dialog open onClose={formik.isSubmitting ? undefined : onClose} maxWidth="md" fullWidth>
+    <Dialog
+      open
+      onClose={formik.isSubmitting ? undefined : onClose}
+      maxWidth="md"
+      fullWidth
+      sx={[
+        {
+          "& .MuiDialog-paper": {
+            bgcolor:
+              theme.palette.mode === "light" ? "#ffffff" : colors.primary[600],
+            color: "text.primary",
+            backgroundImage: "none",
+            border: `1px solid ${theme.palette.divider}`,
+            borderRadius: 2,
+          },
+        },
+      ]}
+    >
       <form onSubmit={formik.handleSubmit} noValidate>
-        <DialogTitle>{employee ? "Modifier l'employé" : "Ajouter un employé"}</DialogTitle>
+        <DialogTitle>
+          {employee ? "Modifier l'employé" : "Ajouter un employé"}
+        </DialogTitle>
         <DialogContent sx={{ pt: "8px !important" }}>
           <Row>
-            <TextField label="Prénom" autoFocus {...fieldProps(formik, "firstname")} />
-            <TextField label="Nom" {...fieldProps(formik, "lastname")} />
+            <TextField
+              label="Prénom"
+              size="small"
+              autoFocus
+              {...fieldProps(formik, "firstname")}
+            />
+            <TextField
+              size="small"
+              label="Nom"
+              {...fieldProps(formik, "lastname")}
+            />
           </Row>
           <Row>
-            <TextField label="Numéro d'employé" {...fieldProps(formik, "employee_number")} />
-            <TextField label="Sigle (facultatif)" {...fieldProps(formik, "acronym")} />
+            <TextField
+              label="Matricule"
+              size="small"
+              {...fieldProps(formik, "employee_number")}
+            />
+            <TextField
+              label="Sigle"
+              size="small"
+              {...fieldProps(formik, "acronym")}
+            />
           </Row>
           <Row>
             <TextField
               select
+              size="small"
               label="Département"
               disabled={loadingDepartments}
               {...fieldProps(formik, "department_id")}
@@ -112,6 +174,7 @@ export default function EmployeeFormDialog({ employee, onClose }: Props) {
             </TextField>
             <TextField
               select
+              size="small"
               label="Poste"
               disabled={loadingPositions}
               {...fieldProps(formik, "position_id")}
@@ -126,36 +189,66 @@ export default function EmployeeFormDialog({ employee, onClose }: Props) {
           <Row>
             <TextField
               label="E-mail professionnel"
+              size="small"
               type="email"
               {...fieldProps(formik, "professional_email")}
             />
             <TextField
               label="E-mail personnel (facultatif)"
               type="email"
+              size="small"
               {...fieldProps(formik, "personal_email")}
             />
           </Row>
           <Row>
-            <TextField label="Téléphone" type="tel" {...fieldProps(formik, "phone")} />
+            <TextField
+              label="Téléphone"
+              size="small"
+              type="tel"
+              {...fieldProps(formik, "phone")}
+            />
+            <CommonDatePicker
+              label="Date d'embauche"
+              name="hire_date"
+              value={formik.values.hire_date}
+              onChange={(value) => formik.setFieldValue("hire_date", value)}
+              onBlur={() => formik.setFieldTouched("hire_date", true)}
+            />
             <TextField
               label="Date d'embauche"
               type="date"
+              size="small"
               {...fieldProps(formik, "hire_date")}
               slotProps={{ inputLabel: { shrink: true } }}
             />
           </Row>
-          <TextField label="Adresse" {...fieldProps(formik, "address")} />
+          <TextField
+            size="small"
+            label="Adresse"
+            {...fieldProps(formik, "address")}
+          />
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button onClick={onClose} disabled={formik.isSubmitting}>Annuler</Button>
-          <Button
-            type="submit"
-            variant="contained"
+          <CommonGreyButton
+            onClick={onClose}
             disabled={formik.isSubmitting}
-            startIcon={formik.isSubmitting ? <CircularProgress size={16} color="inherit" /> : undefined}
+            size="small"
+          >
+            Annuler
+          </CommonGreyButton>
+          <CommonBlueButton
+            type="submit"
+            size="small"
+            variant="contained"
+            startIcon={
+              formik.isSubmitting ? (
+                <CircularProgress size={16} color="inherit" />
+              ) : undefined
+            }
+            disabled={formik.isSubmitting}
           >
             Enregistrer
-          </Button>
+          </CommonBlueButton>
         </DialogActions>
       </form>
     </Dialog>

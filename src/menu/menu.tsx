@@ -65,7 +65,6 @@ export const menus: MenuItemType[] = [
         title: "Régions",
         path: "/regions",
         icon: <ChevronRightOutlinedIcon />,
-        permissions: ["region.view"],
       },
 
       {

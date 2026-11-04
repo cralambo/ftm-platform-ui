@@ -9,7 +9,6 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableHead,
   TableRow,
   Tooltip,
   Typography,
@@ -29,6 +28,7 @@ import type { Municipality } from "@/features/municipality/municipality.types";
 import MunicipalityFormDialog from "@/features/municipality/MunicipalityFormDialog";
 import CommonTable from "@/components/CommonTable";
 import CommonTablePagination from "@/components/CommonTablePagination";
+import CommonTableHead from "@/components/CommonTableHead";
 
 export default function MunicipalityList() {
   const { page, size, setPage, changeSize } = usePagination();
@@ -88,16 +88,13 @@ export default function MunicipalityList() {
           <CommonTable>
             {isFetching && <LinearProgress />}
             <Table size="small">
-              <TableHead>
-                <TableRow>
-                  <TableCell sx={{ fontWeight: 600 }}>Commune</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>District</TableCell>
-                  <TableCell align="right" sx={{ fontWeight: 600 }}>
-                    Actions
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-
+              <CommonTableHead
+                columns={[
+                  { label: "Commune" },
+                  { label: "District" },
+                  { label: "Actions", align: "right", width: 100 },
+                ]}
+              />
               <TableBody>
                 {municipalities.length === 0 && !isFetching && (
                   <TableRow>

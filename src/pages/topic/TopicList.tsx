@@ -9,7 +9,6 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableHead,
   TableRow,
   Tooltip,
   Typography,
@@ -29,6 +28,7 @@ import {
 import type { Topic } from "@/features/topic/topic.types";
 import CommonTablePagination from "@/components/CommonTablePagination";
 import CommonTable from "@/components/CommonTable";
+import CommonTableHead from "@/components/CommonTableHead";
 
 export default function TopicList() {
   const { page, size, setPage, changeSize } = usePagination();
@@ -86,16 +86,13 @@ export default function TopicList() {
           <CommonTable>
             {isFetching && <LinearProgress />}
             <Table size="small">
-              <TableHead>
-                <TableRow>
-                  <TableCell sx={{ fontWeight: 600 }}>Nom</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Description</TableCell>
-                  <TableCell align="right" sx={{ fontWeight: 600 }}>
-                    Actions
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-
+              <CommonTableHead
+                columns={[
+                  { label: "Nom" },
+                  { label: "Description" },
+                  { label: "Actions", align: "right", width: 100 },
+                ]}
+              />
               <TableBody>
                 {topics.length === 0 && !isFetching && (
                   <TableRow>

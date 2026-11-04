@@ -5,25 +5,26 @@ import * as Yup from "yup";
 import {
   Alert,
   Box,
-  Button,
   CardContent,
+  Checkbox,
   CircularProgress,
   Divider,
   FormControl,
   FormHelperText,
+  FormLabel,
   Grid,
-  InputLabel,
+  IconButton,
   MenuItem,
-  OutlinedInput,
-  Select,
+  Paper,
   Stack,
   TextField,
   Typography,
+  useTheme,
 } from "@mui/material";
 
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import AddIcon from "@mui/icons-material/Add";
-import DeleteIcon from "@mui/icons-material/Delete";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlineOutlined";
 
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -56,6 +57,11 @@ import FundingSummary from "@/features/project/FundingSummary";
 import { computeBudget, formatCents, toCents } from "@/features/project/budget";
 import { useGetDistrictsByRegionQuery } from "../district/districtApi";
 import CommonCard from "@/components/CommonCard";
+import CommonGreyButton from "@/components/CommonGreyButton";
+import CommonBlueButton from "@/components/CommonBlueButton";
+import { tokens } from "@/theme";
+import CommonDatePicker from "@/components/common/CommonDatePicker";
+import dayjs from "dayjs";
 
 // =========================================================
 // VALIDATION
@@ -260,6 +266,8 @@ const buildPayload = (values: ProjectRequest): ProjectRequest => ({
 });
 
 export default function CreateProject() {
+  const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
   const navigate = useNavigate();
 
   const location = useLocation();
@@ -459,16 +467,16 @@ export default function CreateProject() {
           addLabel=""
           onAdd={() => undefined}
         />
-
-        <Button
-          variant="outlined"
-          startIcon={<ArrowBackIcon />}
-          onClick={() => navigate("/projects")}
-          sx={{ mb: 3 }}
-        >
-          Retour aux projets
-        </Button>
-
+        <Box sx={{ mb: 3 }}>
+          <CommonGreyButton
+            variant="outlined"
+            onClick={() => navigate("/projects")}
+            startIcon={<ArrowBackIcon />}
+            size="small"
+          >
+            Retour aux projets
+          </CommonGreyButton>
+        </Box>
         <form onSubmit={formik.handleSubmit} noValidate>
           <Stack spacing={3}>
             {formik.submitCount > 0 && !formik.isValid && (
@@ -497,16 +505,22 @@ export default function CreateProject() {
 
                 <Grid container spacing={2}>
                   <Grid size={{ xs: 12, md: 6 }}>
-                    <TextField
-                      size="small"
-                      fullWidth
-                      type="date"
+                    <CommonDatePicker
                       label="Date d'octroi"
                       name="granted_project.grant_date"
-                      value={formik.values.granted_project?.grant_date ?? ""}
-                      onChange={formik.handleChange}
-                      onBlur={formik.handleBlur}
-                      slotProps={{ inputLabel: { shrink: true } }}
+                      value={formik.values.granted_project?.grant_date}
+                      onChange={(value) =>
+                        formik.setFieldValue(
+                          "granted_project.grant_date",
+                          value,
+                        )
+                      }
+                      onBlur={() =>
+                        formik.setFieldTouched(
+                          "granted_project.grant_date",
+                          true,
+                        )
+                      }
                       error={Boolean(nestedError("granted_project.grant_date"))}
                       helperText={
                         nestedError("granted_project.grant_date") ?? " "
@@ -592,64 +606,55 @@ export default function CreateProject() {
                   </Grid>
 
                   <Grid size={{ xs: 12, md: 4 }}>
-                    <TextField
-                      size="small"
-                      fullWidth
-                      type="date"
+                    <CommonDatePicker
                       label="Date de début"
-                      slotProps={{
-                        inputLabel: {
-                          shrink: true,
-                        },
-                      }}
-                      {...formik.getFieldProps("start_date")}
-                      error={!!fieldError("start_date")}
-                      helperText={fieldError("start_date")}
+                      name="start_date"
+                      value={formik.values.start_date}
+                      onChange={(value) =>
+                        formik.setFieldValue("start_date", value)
+                      }
+                      onBlur={() => formik.setFieldTouched("start_date", true)}
+                      error={Boolean(nestedError("start_date"))}
+                      helperText={nestedError("start_date") ?? " "}
+                    />
+                  </Grid>
+
+                  <Grid size={{ xs: 12, md: 4 }}>
+                    <CommonDatePicker
+                      label="Date de fin"
+                      value={formik.values.end_date}
+                      onChange={(value) =>
+                        formik.setFieldValue("end_date", value)
+                      }
+                      minDate={
+                        formik.values.start_date
+                          ? dayjs(formik.values.start_date)
+                          : undefined
+                      }
+                      error={Boolean(fieldError("end_date"))}
+                      helperText={fieldError("end_date") ?? " "}
                     />
                   </Grid>
 
                   <Grid size={{ xs: 12, md: 4 }}>
                     <TextField
-                      size="small"
+                      select
                       fullWidth
-                      type="date"
-                      label="Date de fin"
-                      slotProps={{
-                        inputLabel: {
-                          shrink: true,
-                        },
-                      }}
-                      {...formik.getFieldProps("end_date")}
-                      error={!!fieldError("end_date")}
-                      helperText={fieldError("end_date")}
-                    />
-                  </Grid>
-
-                  <Grid size={{ xs: 12, md: 4 }}>
-                    <FormControl fullWidth>
-                      <InputLabel>Statut</InputLabel>
-
-                      <Select
-                        label="Statut"
-                        size="small"
-                        value={formik.values.status}
-                        onChange={(event) =>
-                          formik.setFieldValue("status", event.target.value)
-                        }
-                      >
-                        <MenuItem value="PENDING">En attente</MenuItem>
-
-                        <MenuItem value="IN_PROGRESS">En cours</MenuItem>
-
-                        <MenuItem value="APPROVED">Approuvé</MenuItem>
-
-                        <MenuItem value="REJECTED">Rejeté</MenuItem>
-
-                        <MenuItem value="RETURNED">Retourné</MenuItem>
-                      </Select>
-
-                      <FormHelperText>{fieldError("status")}</FormHelperText>
-                    </FormControl>
+                      size="small"
+                      label="Statut"
+                      value={formik.values.status}
+                      error={!!fieldError("status")}
+                      helperText={fieldError("status")}
+                      onChange={(event) =>
+                        formik.setFieldValue("status", event.target.value)
+                      }
+                    >
+                      <MenuItem value="PENDING">En attente</MenuItem>
+                      <MenuItem value="IN_PROGRESS">En cours</MenuItem>
+                      <MenuItem value="APPROVED">Approuvé</MenuItem>
+                      <MenuItem value="REJECTED">Rejeté</MenuItem>
+                      <MenuItem value="RETURNED">Retourné</MenuItem>
+                    </TextField>
                   </Grid>
                 </Grid>
               </CardContent>
@@ -735,178 +740,141 @@ export default function CreateProject() {
                   {/* REGION */}
 
                   <Grid size={{ xs: 12, md: 4 }}>
-                    <FormControl fullWidth error={!!fieldError("region_id")}>
-                      <InputLabel>Région</InputLabel>
-
-                      <Select
-                        size="small"
-                        label="Région"
-                        value={formik.values.region_id}
-                        onChange={(event) => {
-                          formik.setFieldValue("region_id", event.target.value);
-
-                          formik.setFieldValue("district_id", "");
-
-                          formik.setFieldValue("municipality_id", "");
-                        }}
-                      >
-                        {regions.map((region: any) => (
-                          <MenuItem key={getId(region)} value={getId(region)}>
-                            {getName(region)}
-                          </MenuItem>
-                        ))}
-                      </Select>
-
-                      <FormHelperText>{fieldError("region_id")}</FormHelperText>
-                    </FormControl>
+                    <TextField
+                      select
+                      fullWidth
+                      size="small"
+                      label="Région"
+                      value={formik.values.region_id}
+                      error={!!fieldError("region_id")}
+                      helperText={fieldError("region_id")}
+                      onChange={(event) => {
+                        formik.setFieldValue("region_id", event.target.value);
+                        formik.setFieldValue("district_id", "");
+                        formik.setFieldValue("municipality_id", "");
+                      }}
+                    >
+                      {regions.map((region: any) => (
+                        <MenuItem key={getId(region)} value={getId(region)}>
+                          {getName(region)}
+                        </MenuItem>
+                      ))}
+                    </TextField>
                   </Grid>
 
                   {/* DISTRICT */}
 
                   <Grid size={{ xs: 12, md: 4 }}>
-                    <FormControl
+                    <TextField
+                      select
                       fullWidth
+                      size="small"
+                      label="District"
                       disabled={!formik.values.region_id || loadingDistricts}
+                      value={formik.values.district_id}
                       error={!!fieldError("district_id")}
+                      helperText={fieldError("district_id")}
+                      onChange={(event) => {
+                        formik.setFieldValue("district_id", event.target.value);
+                        formik.setFieldValue("municipality_id", "");
+                      }}
                     >
-                      <InputLabel>District</InputLabel>
-
-                      <Select
-                        size="small"
-                        label="District"
-                        value={formik.values.district_id}
-                        onChange={(event) => {
-                          formik.setFieldValue(
-                            "district_id",
-                            event.target.value,
-                          );
-
-                          formik.setFieldValue("municipality_id", "");
-                        }}
-                      >
-                        {filteredDistricts.map((district: any) => (
-                          <MenuItem
-                            key={getId(district)}
-                            value={getId(district)}
-                          >
-                            {getName(district)}
-                          </MenuItem>
-                        ))}
-                      </Select>
-
-                      <FormHelperText>
-                        {fieldError("district_id")}
-                      </FormHelperText>
-                    </FormControl>
+                      {filteredDistricts.map((district: any) => (
+                        <MenuItem key={getId(district)} value={getId(district)}>
+                          {getName(district)}
+                        </MenuItem>
+                      ))}
+                    </TextField>
                   </Grid>
 
                   {/* MUNICIPALITY */}
 
                   <Grid size={{ xs: 12, md: 4 }}>
-                    <FormControl
+                    <TextField
+                      select
                       fullWidth
+                      size="small"
+                      label="Commune"
                       disabled={!formik.values.district_id}
+                      value={formik.values.municipality_id}
                       error={!!fieldError("municipality_id")}
+                      helperText={fieldError("municipality_id")}
+                      onChange={(event) =>
+                        formik.setFieldValue(
+                          "municipality_id",
+                          event.target.value,
+                        )
+                      }
                     >
-                      <InputLabel>Commune</InputLabel>
-
-                      <Select
-                        size="small"
-                        label="Commune"
-                        value={formik.values.municipality_id}
-                        onChange={(event) =>
-                          formik.setFieldValue(
-                            "municipality_id",
-                            event.target.value,
-                          )
-                        }
-                      >
-                        {filteredMunicipalities.map((municipality: any) => (
-                          <MenuItem
-                            key={getId(municipality)}
-                            value={getId(municipality)}
-                          >
-                            {getName(municipality)}
-                          </MenuItem>
-                        ))}
-                      </Select>
-
-                      <FormHelperText>
-                        {fieldError("municipality_id")}
-                      </FormHelperText>
-                    </FormControl>
+                      {filteredMunicipalities.map((municipality: any) => (
+                        <MenuItem
+                          key={getId(municipality)}
+                          value={getId(municipality)}
+                        >
+                          {getName(municipality)}
+                        </MenuItem>
+                      ))}
+                    </TextField>
                   </Grid>
 
                   {/* LANDSCAPE */}
 
                   <Grid size={{ xs: 12, md: 6 }}>
-                    <FormControl fullWidth error={!!fieldError("landscape_id")}>
-                      <InputLabel>Paysage</InputLabel>
-
-                      <Select
-                        size="small"
-                        label="Paysage"
-                        value={formik.values.landscape_id}
-                        onChange={(event) => {
-                          formik.setFieldValue(
-                            "landscape_id",
-                            event.target.value,
-                          );
-
-                          formik.setFieldValue("sub_landscape_id", "");
-                        }}
-                      >
-                        {landscapes.map((landscape: any) => (
-                          <MenuItem
-                            key={getId(landscape)}
-                            value={getId(landscape)}
-                          >
-                            {getName(landscape)}
-                          </MenuItem>
-                        ))}
-                      </Select>
-
-                      <FormHelperText>
-                        {fieldError("landscape_id")}
-                      </FormHelperText>
-                    </FormControl>
+                    <TextField
+                      select
+                      fullWidth
+                      size="small"
+                      label="Paysage"
+                      value={formik.values.landscape_id}
+                      error={!!fieldError("landscape_id")}
+                      helperText={fieldError("landscape_id")}
+                      onChange={(event) => {
+                        formik.setFieldValue(
+                          "landscape_id",
+                          event.target.value,
+                        );
+                        formik.setFieldValue("sub_landscape_id", "");
+                      }}
+                    >
+                      {landscapes.map((landscape: any) => (
+                        <MenuItem
+                          key={getId(landscape)}
+                          value={getId(landscape)}
+                        >
+                          {getName(landscape)}
+                        </MenuItem>
+                      ))}
+                    </TextField>
                   </Grid>
 
                   {/* SUB LANDSCAPE */}
 
                   <Grid size={{ xs: 12, md: 6 }}>
-                    <FormControl
+                    <TextField
+                      select
                       fullWidth
+                      size="small"
+                      label="Sous-paysage"
                       disabled={!formik.values.landscape_id}
+                      value={formik.values.sub_landscape_id}
                       error={!!fieldError("sub_landscape_id")}
+                      helperText={fieldError("sub_landscape_id")}
+                      onChange={(event) =>
+                        formik.setFieldValue(
+                          "sub_landscape_id",
+                          event.target.value,
+                        )
+                      }
                     >
-                      <InputLabel>Sous-paysage</InputLabel>
-
-                      <Select
-                        size="small"
-                        label="Sous-paysage"
-                        value={formik.values.sub_landscape_id}
-                        onChange={(event) =>
-                          formik.setFieldValue(
-                            "sub_landscape_id",
-                            event.target.value,
-                          )
-                        }
-                      >
-                        {filteredSubLandscapes.map((subLandscape: any) => (
-                          <MenuItem
-                            key={getId(subLandscape)}
-                            value={getId(subLandscape)}
-                          >
-                            {getName(subLandscape)}
-                          </MenuItem>
-                        ))}
-                      </Select>
-
-                      <FormHelperText>
-                        {fieldError("sub_landscape_id")}
-                      </FormHelperText>
-                    </FormControl>
+                      {filteredSubLandscapes.map((subLandscape: any) => (
+                        <MenuItem
+                          key={getId(subLandscape)}
+                          value={getId(subLandscape)}
+                        >
+                          {getName(subLandscape)}
+                        </MenuItem>
+                      ))}
+                    </TextField>
                   </Grid>
                 </Grid>
               </CardContent>
@@ -934,99 +902,78 @@ export default function CreateProject() {
 
                 <Grid container spacing={2}>
                   <Grid size={{ xs: 12, md: 4 }}>
-                    <FormControl
+                    <TextField
+                      select
                       fullWidth
+                      size="small"
+                      label="Partenaire d'appui"
+                      value={formik.values.support_partner_id}
                       error={!!fieldError("support_partner_id")}
+                      helperText={fieldError("support_partner_id")}
+                      onChange={(event) =>
+                        formik.setFieldValue(
+                          "support_partner_id",
+                          event.target.value,
+                        )
+                      }
                     >
-                      <InputLabel>Partenaire d'appui</InputLabel>
-
-                      <Select
-                        size="small"
-                        label="Partenaire d'appui"
-                        value={formik.values.support_partner_id}
-                        onChange={(event) =>
-                          formik.setFieldValue(
-                            "support_partner_id",
-                            event.target.value,
-                          )
-                        }
-                      >
-                        {supportPartners.map((partner: any) => (
-                          <MenuItem key={getId(partner)} value={getId(partner)}>
-                            {getName(partner)}
-                          </MenuItem>
-                        ))}
-                      </Select>
-
-                      <FormHelperText>
-                        {fieldError("support_partner_id")}
-                      </FormHelperText>
-                    </FormControl>
+                      {supportPartners.map((partner: any) => (
+                        <MenuItem key={getId(partner)} value={getId(partner)}>
+                          {getName(partner)}
+                        </MenuItem>
+                      ))}
+                    </TextField>
                   </Grid>
 
                   <Grid size={{ xs: 12, md: 4 }}>
-                    <FormControl
+                    <TextField
+                      select
                       fullWidth
+                      size="small"
+                      label="Organisation locale"
+                      value={formik.values.local_organization_id}
                       error={!!fieldError("local_organization_id")}
+                      helperText={fieldError("local_organization_id")}
+                      onChange={(event) =>
+                        formik.setFieldValue(
+                          "local_organization_id",
+                          event.target.value,
+                        )
+                      }
                     >
-                      <InputLabel>Organisation locale</InputLabel>
-
-                      <Select
-                        size="small"
-                        label="Organisation locale"
-                        value={formik.values.local_organization_id}
-                        onChange={(event) =>
-                          formik.setFieldValue(
-                            "local_organization_id",
-                            event.target.value,
-                          )
-                        }
-                      >
-                        {localOrganizations.map((organization: any) => (
-                          <MenuItem
-                            key={getId(organization)}
-                            value={getId(organization)}
-                          >
-                            {getName(organization)}
-                          </MenuItem>
-                        ))}
-                      </Select>
-
-                      <FormHelperText>
-                        {fieldError("local_organization_id")}
-                      </FormHelperText>
-                    </FormControl>
+                      {localOrganizations.map((organization: any) => (
+                        <MenuItem
+                          key={getId(organization)}
+                          value={getId(organization)}
+                        >
+                          {getName(organization)}
+                        </MenuItem>
+                      ))}
+                    </TextField>
                   </Grid>
 
                   <Grid size={{ xs: 12, md: 4 }}>
-                    <FormControl
+                    <TextField
+                      select
                       fullWidth
+                      size="small"
+                      label="Plan stratégique"
+                      value={formik.values.strategic_plan_id}
                       error={!!fieldError("strategic_plan_id")}
+                      helperText={fieldError("strategic_plan_id")}
+                      onChange={(event) =>
+                        formik.setFieldValue(
+                          "strategic_plan_id",
+                          event.target.value,
+                        )
+                      }
                     >
-                      <InputLabel>Plan stratégique</InputLabel>
-
-                      <Select
-                        size="small"
-                        label="Plan stratégique"
-                        value={formik.values.strategic_plan_id}
-                        onChange={(event) =>
-                          formik.setFieldValue(
-                            "strategic_plan_id",
-                            event.target.value,
-                          )
-                        }
-                      >
-                        {strategicPlans.map((plan: any) => (
-                          <MenuItem key={getId(plan)} value={getId(plan)}>
-                            {getName(plan)}
-                          </MenuItem>
-                        ))}
-                      </Select>
-
-                      <FormHelperText>
-                        {fieldError("strategic_plan_id")}
-                      </FormHelperText>
-                    </FormControl>
+                      {strategicPlans.map((plan: any) => (
+                        <MenuItem key={getId(plan)} value={getId(plan)}>
+                          {getName(plan)}
+                        </MenuItem>
+                      ))}
+                    </TextField>
                   </Grid>
                 </Grid>
               </CardContent>
@@ -1056,47 +1003,140 @@ export default function CreateProject() {
                     formik.touched.topic_ids && formik.errors.topic_ids,
                   )}
                 >
-                  <InputLabel>Thématiques</InputLabel>
-
-                  <Select
-                    size="small"
-                    multiple
-                    value={formik.values.topic_ids}
-                    onChange={(event) => {
-                      const value = event.target.value;
-
-                      formik.setFieldValue(
-                        "topic_ids",
-                        typeof value === "string" ? value.split(",") : value,
-                      );
+                  <FormLabel
+                    sx={{
+                      mb: 1.5,
+                      fontWeight: 600,
+                      color: "text.primary",
+                      "&.Mui-focused": {
+                        color: "primary.main",
+                      },
                     }}
-                    input={<OutlinedInput label="Thématiques" />}
-                    renderValue={(selected) =>
-                      topics
-                        .filter((topic) => selected.includes(topic.id))
-                        .map((topic) => topic.name)
-                        .join(", ")
-                    }
                   >
-                    {topics.map((topic) => (
-                      <MenuItem
-                        key={topic.id}
-                        value={topic.id}
-                        disabled={
-                          formik.values.topic_ids.length >= MAX_TOPICS &&
-                          !formik.values.topic_ids.includes(topic.id)
-                        }
-                      >
-                        {getName(topic)}
-                      </MenuItem>
-                    ))}
-                  </Select>
+                    Thématiques
+                  </FormLabel>
 
-                  <FormHelperText>
-                    {typeof formik.errors.topic_ids === "string"
-                      ? formik.errors.topic_ids
-                      : `${formik.values.topic_ids.length}/${MAX_TOPICS} thématiques`}
-                  </FormHelperText>
+                  <Paper
+                    variant="outlined"
+                    sx={{
+                      borderRadius: 1,
+                      bgcolor: "transparent",
+                      backgroundImage: "none",
+                      boxShadow: "none",
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        display: "grid",
+                        gridTemplateColumns: {
+                          xs: "1fr",
+                          sm: "repeat(2, minmax(0, 1fr))",
+                        },
+                        gap: 1,
+                      }}
+                    >
+                      {topics.map((topic) => {
+                        const checked = formik.values.topic_ids.includes(
+                          topic.id,
+                        );
+
+                        const disabled =
+                          formik.values.topic_ids.length >= MAX_TOPICS &&
+                          !checked;
+
+                        return (
+                          <Box
+                            key={topic.id}
+                            onClick={() => {
+                              if (disabled) return;
+
+                              const newValues = checked
+                                ? formik.values.topic_ids.filter(
+                                    (id: string) => id !== topic.id,
+                                  )
+                                : [...formik.values.topic_ids, topic.id];
+
+                              formik.setFieldValue("topic_ids", newValues);
+                            }}
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              borderRadius: 1,
+                              px: 1,
+                              cursor: disabled ? "not-allowed" : "pointer",
+                              opacity: disabled ? 0.5 : 1,
+                              bgcolor: "transparent",
+                              transition: "all 0.2s ease",
+                              "&:hover": {
+                                bgcolor: "action.hover",
+                              },
+                            }}
+                          >
+                            <Checkbox
+                              size="small"
+                              checked={checked}
+                              disabled={disabled}
+                              onChange={() => {
+                                const newValues = checked
+                                  ? formik.values.topic_ids.filter(
+                                      (id: string) => id !== topic.id,
+                                    )
+                                  : [...formik.values.topic_ids, topic.id];
+
+                                formik.setFieldValue("topic_ids", newValues);
+                              }}
+                              onClick={(event) => event.stopPropagation()}
+                              sx={{
+                                color: colors.grey[400],
+                                "&.Mui-checked": {
+                                  color: colors.bluePrimary[600],
+                                },
+                                "&.MuiCheckbox-indeterminate": {
+                                  color: colors.bluePrimary[600],
+                                },
+                              }}
+                            />
+
+                            <Typography variant="body2">
+                              {getName(topic)}
+                            </Typography>
+                          </Box>
+                        );
+                      })}
+                    </Box>
+                  </Paper>
+
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      mt: 1,
+                    }}
+                  >
+                    <FormHelperText
+                      error={Boolean(
+                        formik.touched.topic_ids && formik.errors.topic_ids,
+                      )}
+                    >
+                      {formik.touched.topic_ids &&
+                      typeof formik.errors.topic_ids === "string"
+                        ? formik.errors.topic_ids
+                        : "Sélectionnez les thématiques concernées."}
+                    </FormHelperText>
+
+                    <Typography
+                      variant="caption"
+                      color={
+                        formik.values.topic_ids.length >= MAX_TOPICS
+                          ? "warning.main"
+                          : "text.secondary"
+                      }
+                      sx={{ fontWeight: 600 }}
+                    >
+                      {formik.values.topic_ids.length}/{MAX_TOPICS}
+                    </Typography>
+                  </Box>
                 </FormControl>
               </CardContent>
             </CommonCard>
@@ -1145,40 +1185,37 @@ export default function CreateProject() {
                             sx={{ alignItems: "flex-start" }}
                           >
                             <Grid size={{ xs: 12, md: 6 }}>
-                              <FormControl
+                              <TextField
+                                select
                                 fullWidth
+                                size="small"
+                                label="Cofinanceur"
+                                name={`co_funders.${index}.co_funder_id`}
+                                value={coFunder.co_funder_id}
                                 error={Boolean(
                                   nestedError(
                                     `co_funders.${index}.co_funder_id`,
                                   ),
                                 )}
+                                helperText={
+                                  nestedError(
+                                    `co_funders.${index}.co_funder_id`,
+                                  ) ?? " "
+                                }
+                                onChange={formik.handleChange}
+                                onBlur={formik.handleBlur}
                               >
-                                <InputLabel>Cofinanceur</InputLabel>
-                                <Select
-                                  size="small"
-                                  label="Cofinanceur"
-                                  name={`co_funders.${index}.co_funder_id`}
-                                  value={coFunder.co_funder_id}
-                                  onChange={formik.handleChange}
-                                  onBlur={formik.handleBlur}
-                                >
-                                  {availableCoFunders(
-                                    coFunder.co_funder_id,
-                                  ).map((funder: any) => (
+                                {availableCoFunders(coFunder.co_funder_id).map(
+                                  (funder: any) => (
                                     <MenuItem
                                       key={getId(funder)}
                                       value={getId(funder)}
                                     >
                                       {getName(funder)}
                                     </MenuItem>
-                                  ))}
-                                </Select>
-                                <FormHelperText>
-                                  {nestedError(
-                                    `co_funders.${index}.co_funder_id`,
-                                  ) ?? " "}
-                                </FormHelperText>
-                              </FormControl>
+                                  ),
+                                )}
+                              </TextField>
                             </Grid>
 
                             <Grid size={{ xs: 12, md: 5 }}>
@@ -1205,16 +1242,17 @@ export default function CreateProject() {
                             </Grid>
 
                             <Grid size={{ xs: 12, md: 1 }}>
-                              <Button
+                              <IconButton
                                 color="error"
-                                variant="outlined"
-                                fullWidth
-                                sx={{ height: 56 }}
+                                size="small"
                                 aria-label="Retirer ce cofinanceur"
                                 onClick={() => arrayHelpers.remove(index)}
+                                sx={{
+                                  mt: { xs: 0, md: 0.5 },
+                                }}
                               >
-                                <DeleteIcon />
-                              </Button>
+                                <DeleteOutlineIcon />
+                              </IconButton>
                             </Grid>
                           </Grid>
                         </CommonCard>
@@ -1227,7 +1265,7 @@ export default function CreateProject() {
                       )}
 
                       <Box>
-                        <Button
+                        <CommonBlueButton
                           size="small"
                           variant="outlined"
                           startIcon={<AddIcon />}
@@ -1236,7 +1274,7 @@ export default function CreateProject() {
                           }
                         >
                           Ajouter un cofinanceur
-                        </Button>
+                        </CommonBlueButton>
                       </Box>
                     </Stack>
                   )}
@@ -1260,20 +1298,18 @@ export default function CreateProject() {
                   sx={{ justifyContent: "flex-end" }}
                   spacing={2}
                 >
-                  <Button
-                    size="small"
+                  <CommonGreyButton
                     variant="outlined"
                     disabled={isSubmitting}
                     onClick={() => navigate("/projects")}
+                    size="small"
                   >
-                    Annuler
-                  </Button>
-
-                  <Button
+                    Retour aux projets
+                  </CommonGreyButton>
+                  <CommonBlueButton
                     size="small"
                     type="submit"
-                    variant="contained"
-                    disabled={isSubmitting}
+                    variant="outlined"
                     startIcon={
                       isSubmitting ? (
                         <CircularProgress size={18} color="inherit" />
@@ -1285,7 +1321,7 @@ export default function CreateProject() {
                     {editingProject
                       ? "Enregistrer les modifications"
                       : "Créer le projet"}
-                  </Button>
+                  </CommonBlueButton>
                 </Stack>
               </CardContent>
             </CommonCard>

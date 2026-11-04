@@ -33,3 +33,7 @@ export interface PartnerReportCreateInput {
 export interface PartnerReportUpdateInput {
   general_comments?: string;
 }
+
+export interface SubmitPartnerReportRequest {
+  general_comments?: string | null;
+}
