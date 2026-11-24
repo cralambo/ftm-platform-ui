@@ -39,8 +39,8 @@ import {
 import type { DisbursementActivity, EntityId } from "./disbursement.types";
 
 import ActivityFormDialog from "./Activityformdialog";
-import CommonTable from "@/components/CommonTable";
-import CommonCard from "@/components/CommonCard";
+import CommonTable from "@/components/common/CommonTable";
+import CommonCard from "@/components/common/CommonCard";
 
 // -----------------------------------------------------------------------------
 // Helpers

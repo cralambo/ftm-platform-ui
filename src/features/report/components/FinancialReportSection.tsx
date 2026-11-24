@@ -38,10 +38,10 @@ import {
   type FinancialReportItemRequest,
 } from "@/features/report/financialReportApi";
 
-import CommonTable from "@/components/CommonTable";
-import CommonCard from "@/components/CommonCard";
+import CommonTable from "@/components/common/CommonTable";
+import CommonCard from "@/components/common/CommonCard";
 import FinancialExpenseAttachments from "./FinancialExpenseAttachments";
-import CommonBlueButton from "@/components/CommonBlueButton";
+import CommonBlueButton from "@/components/common/CommonBlueButton";
 
 interface FinancialReportSectionProps {
   reportId: string;

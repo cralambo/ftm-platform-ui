@@ -43,7 +43,6 @@ export default function CommonBlueButton({
         color: "#ffffff",
         fontWeight: 600,
         textTransform: "none",
-        borderRadius: 1,
         px: 2.5,
         boxShadow: "none",
         alignSelf: "flex-start",

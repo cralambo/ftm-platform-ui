@@ -22,9 +22,9 @@ import {
   type UpsertTechnicalReportItemRequest,
 } from "@/features/report/technicalReportApi";
 
-import CommonTable from "@/components/CommonTable";
+import CommonTable from "@/components/common/CommonTable";
 import TechnicalActivityAttachments from "./TechnicalActivityAttachments";
-import CommonBlueButton from "@/components/CommonBlueButton";
+import CommonBlueButton from "@/components/common/CommonBlueButton";
 
 interface TechnicalReportSectionProps {
   reportId: string;

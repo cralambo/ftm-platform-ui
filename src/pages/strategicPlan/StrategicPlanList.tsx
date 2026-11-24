@@ -28,8 +28,8 @@ import {
 } from "@/features/strategicPlan/strategicPlanApi";
 import type { StrategicPlan } from "@/features/strategicPlan/strategicPlan.types";
 import CommonTablePagination from "@/components/CommonTablePagination";
-import CommonTable from "@/components/CommonTable";
-import CommonTableHead from "@/components/CommonTableHead";
+import CommonTable from "@/components/common/CommonTable";
+import CommonTableHead from "@/components/common/CommonTableHead";
 
 export default function StrategicPlanList() {
   const { page, size, setPage, changeSize } = usePagination();

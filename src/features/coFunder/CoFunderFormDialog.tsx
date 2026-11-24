@@ -17,8 +17,8 @@ import {
   useUpdateCoFunderMutation,
 } from "./coFunderApi";
 import type { CoFunder, CoFunderInput } from "./coFunder.types";
-import CommonGreyButton from "@/components/CommonGreyButton";
-import CommonBlueButton from "@/components/CommonBlueButton";
+import CommonGreyButton from "@/components/common/CommonGreyButton";
+import CommonBlueButton from "@/components/common/CommonBlueButton";
 import { tokens } from "@/theme";
 
 const schema = Yup.object({

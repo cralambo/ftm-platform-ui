@@ -27,8 +27,8 @@ import {
 } from "@/features/district/districtApi";
 import type { District } from "@/features/district/district.type";
 import CommonTablePagination from "@/components/CommonTablePagination";
-import CommonTable from "@/components/CommonTable";
-import CommonTableHead from "@/components/CommonTableHead";
+import CommonTable from "@/components/common/CommonTable";
+import CommonTableHead from "@/components/common/CommonTableHead";
 
 export default function DistrictList() {
   const { page, size, setPage, changeSize } = usePagination();

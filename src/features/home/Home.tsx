@@ -28,7 +28,7 @@ const Home = (): JSX.Element => {
           boxShadow: "none",
           borderRadius: 1,
           bgcolor: (theme) =>
-            theme.palette.mode === "light" ? "#ffffff" : colors.primary[900], // slate-800
+            theme.palette.mode === "light" ? "#ffffff" : colors.primary[600], // slate-800
           color: (theme) => theme.palette.text.primary,
         }}
       >
@@ -46,7 +46,7 @@ const Home = (): JSX.Element => {
         <Divider sx={{ my: 3 }} />
 
         <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-          <GavelOutlinedIcon color="primary" />
+          <GavelOutlinedIcon />
           <Typography variant="h5" sx={{ ml: 1 }}>
             Conditions générales d'utilisation
           </Typography>

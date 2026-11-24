@@ -21,10 +21,11 @@ import {
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import AddIcon from "@mui/icons-material/Add";
 
 import ConfirmDialog from "@/components/ConfirmDialog";
 import PageHeader from "@/components/PageHeader";
-import CommonTable from "@/components/CommonTable";
+import CommonTable from "@/components/common/CommonTable";
 import CommonTablePagination from "@/components/CommonTablePagination";
 
 import { useNotify } from "@/hooks/useNotify";
@@ -44,7 +45,10 @@ import { formatCents, toCents } from "@/features/project/budget";
 import { statusMeta } from "@/features/project/projectStatus";
 
 import type { RootState } from "@/app/store";
-import CommonTableHead from "@/components/CommonTableHead";
+import CommonTableHead from "@/components/common/CommonTableHead";
+import Can from "@/components/Can";
+import CommonBlueButton from "@/components/common/CommonBlueButton";
+import { PERMISSIONS } from "@/constants/permissions";
 
 export default function ProjectList() {
   const navigate = useNavigate();
@@ -141,10 +145,20 @@ export default function ProjectList() {
     <Box sx={{ m: 3 }}>
       <PageHeader
         title="Projets"
-        {...(!isPartnerContact && {
-          addLabel: "Ajouter un projet",
-          onAdd: () => navigate("/projects/create"),
-        })}
+        addAction={
+          !isPartnerContact ? (
+            <Can permissions={[PERMISSIONS.PROJECTS.CREATE]}>
+              <CommonBlueButton
+                size="small"
+                variant="outlined"
+                startIcon={<AddIcon />}
+                onClick={() => navigate("/projects/create")}
+              >
+                Ajouter un projet
+              </CommonBlueButton>
+            </Can>
+          ) : undefined
+        }
       />
 
       {/* ERROR */}

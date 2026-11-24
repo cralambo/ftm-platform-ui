@@ -8,7 +8,7 @@ import {
 } from "@mui/material";
 import { computeBudget, formatCents } from "./budget";
 import type { ProjectRequest } from "./project.types";
-import CommonCard from "@/components/CommonCard";
+import CommonCard from "@/components/common/CommonCard";
 
 function Line({
   label,

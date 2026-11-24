@@ -27,8 +27,8 @@ import {
 } from "@/features/topic/topicApi";
 import type { Topic } from "@/features/topic/topic.types";
 import CommonTablePagination from "@/components/CommonTablePagination";
-import CommonTable from "@/components/CommonTable";
-import CommonTableHead from "@/components/CommonTableHead";
+import CommonTable from "@/components/common/CommonTable";
+import CommonTableHead from "@/components/common/CommonTableHead";
 
 export default function TopicList() {
   const { page, size, setPage, changeSize } = usePagination();
