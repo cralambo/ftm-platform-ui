@@ -27,8 +27,8 @@ import {
 } from "@/features/position/positionApi";
 import type { Position } from "@/features/position/position.types";
 import CommonTablePagination from "@/components/CommonTablePagination";
-import CommonTable from "@/components/CommonTable";
-import CommonTableHead from "@/components/CommonTableHead";
+import CommonTable from "@/components/common/CommonTable";
+import CommonTableHead from "@/components/common/CommonTableHead";
 
 export default function PositionList() {
   const { page, size, setPage, changeSize } = usePagination();

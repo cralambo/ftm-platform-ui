@@ -26,9 +26,9 @@ import {
 } from "@/features/subLandscape/subLandscapeApi";
 import type { SubLandscape } from "@/features/subLandscape/subLandscape.types";
 import SubLandscapeFormDialog from "@/features/subLandscape/SubLandscapeFormDialog";
-import CommonTable from "@/components/CommonTable";
+import CommonTable from "@/components/common/CommonTable";
 import CommonTablePagination from "@/components/CommonTablePagination";
-import CommonTableHead from "@/components/CommonTableHead";
+import CommonTableHead from "@/components/common/CommonTableHead";
 
 export default function SubLandscapeList() {
   const { page, size, setPage, changeSize } = usePagination();

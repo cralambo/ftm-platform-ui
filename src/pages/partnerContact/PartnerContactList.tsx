@@ -27,8 +27,8 @@ import {
 } from "@/features/partnerContact/partnerContactApi";
 import type { PartnerContact } from "@/features/partnerContact/partnerContact.types";
 import CommonTablePagination from "@/components/CommonTablePagination";
-import CommonTable from "@/components/CommonTable";
-import CommonTableHead from "@/components/CommonTableHead";
+import CommonTable from "@/components/common/CommonTable";
+import CommonTableHead from "@/components/common/CommonTableHead";
 
 export default function PartnerContactList() {
   const { page, size, setPage, changeSize } = usePagination();

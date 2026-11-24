@@ -26,9 +26,9 @@ import {
   useGetDepartmentsQuery,
 } from "@/features/department/departmentApi";
 import type { Department } from "@/features/department/department.types";
-import CommonTable from "@/components/CommonTable";
+import CommonTable from "@/components/common/CommonTable";
 import CommonTablePagination from "@/components/CommonTablePagination";
-import CommonTableHead from "@/components/CommonTableHead";
+import CommonTableHead from "@/components/common/CommonTableHead";
 
 export default function DepartmentList() {
   const { page, size, setPage, changeSize } = usePagination();

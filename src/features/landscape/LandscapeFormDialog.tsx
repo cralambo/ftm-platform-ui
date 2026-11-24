@@ -18,8 +18,8 @@ import {
 } from "./landscapeApi";
 import type { Landscape, LandscapeInput } from "./landscape.types";
 import { tokens } from "@/theme";
-import CommonGreyButton from "@/components/CommonGreyButton";
-import CommonBlueButton from "@/components/CommonBlueButton";
+import CommonGreyButton from "@/components/common/CommonGreyButton";
+import CommonBlueButton from "@/components/common/CommonBlueButton";
 
 const schema = Yup.object({
   name: Yup.string()

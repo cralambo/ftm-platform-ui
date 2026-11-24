@@ -130,7 +130,7 @@ const TopBar = (): JSX.Element => {
           }}
         >
           <MenuItem disabled>
-            <Typography variant="body2">Jean Celestin</Typography>
+            <Typography variant="body2">Mon compte</Typography>
           </MenuItem>
 
           <Divider />

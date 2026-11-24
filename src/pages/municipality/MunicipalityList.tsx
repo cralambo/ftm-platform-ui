@@ -26,9 +26,9 @@ import {
 } from "@/features/municipality/municipalityApi";
 import type { Municipality } from "@/features/municipality/municipality.types";
 import MunicipalityFormDialog from "@/features/municipality/MunicipalityFormDialog";
-import CommonTable from "@/components/CommonTable";
+import CommonTable from "@/components/common/CommonTable";
 import CommonTablePagination from "@/components/CommonTablePagination";
-import CommonTableHead from "@/components/CommonTableHead";
+import CommonTableHead from "@/components/common/CommonTableHead";
 
 export default function MunicipalityList() {
   const { page, size, setPage, changeSize } = usePagination();

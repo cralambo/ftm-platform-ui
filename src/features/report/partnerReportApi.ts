@@ -5,6 +5,8 @@ import { normalizePage, type Page, type PageParams } from "@/types/common";
 import type {
   PartnerReport,
   PartnerReportCreateInput,
+  PartnerReportDetail,
+  PartnerReportSubmitted,
   PartnerReportUpdateInput,
   PartnerReportWithSummary,
   SubmitPartnerReportRequest,
@@ -71,6 +73,64 @@ export const partnerReportApi = api.injectEndpoints({
       ],
     }),
 
+    // Rapports soumis et non encore assignés
+    getSubmittedPartnerReports: build.query<
+      Page<PartnerReportSubmitted>,
+      PageParams
+    >({
+      query: ({ page, size }) => ({
+        url: "/partner-reports/submitted",
+        params: { page, size },
+      }),
+      transformResponse: (raw: unknown) =>
+        normalizePage<PartnerReportSubmitted>(raw),
+      providesTags: providesList<PartnerReportSubmitted>("PartnerReport"),
+    }),
+
+    assignPartnerReportToMe: build.mutation<PartnerReport, string>({
+      query: (id) => ({
+        url: `/partner-reports/${id}/assign`,
+        method: "POST",
+      }),
+      invalidatesTags: (_result, _error, id) => [
+        { type: "PartnerReport" as const, id },
+        LIST,
+      ],
+    }),
+
+    getAssignedReport: build.query<PartnerReportDetail, string>({
+      query: (reportId) => ({
+        url: `/partner-reports/detail/${reportId}/assigned`,
+        method: "GET",
+      }),
+
+      providesTags: (_result, _error, reportId) => [
+        { type: "PartnerReport", id: reportId },
+      ],
+    }),
+
+    getAttachmentContent: build.query<Blob, string>({
+      query: (attachmentId) => ({
+        url: `/partner-reports/attachments/${attachmentId}/content`,
+        method: "GET",
+        responseHandler: (response) => response.blob(),
+      }),
+    }),
+
+    // Rapports soumis et assignés à l'utilisateur connecté
+    getAssignedPartnerReports: build.query<
+      Page<PartnerReportSubmitted>,
+      PageParams
+    >({
+      query: ({ page, size }) => ({
+        url: "/partner-reports/assigned",
+        params: { page, size },
+      }),
+      transformResponse: (raw: unknown) =>
+        normalizePage<PartnerReportSubmitted>(raw),
+      providesTags: providesList<PartnerReportSubmitted>("PartnerReport"),
+    }),
+
     updatePartnerReport: build.mutation<
       PartnerReport,
       { id: string } & PartnerReportUpdateInput
@@ -99,6 +159,11 @@ export const {
   useGetPartnerReportDetailQuery,
   useAddPartnerReportMutation,
   useInitializePartnerReportMutation,
+  useGetSubmittedPartnerReportsQuery,
+  useGetAssignedPartnerReportsQuery,
+  useGetAssignedReportQuery,
+  useGetAttachmentContentQuery,
+  useAssignPartnerReportToMeMutation,
   useUpdatePartnerReportMutation,
   useDeletePartnerReportMutation,
   useSubmitPartnerReportMutation,

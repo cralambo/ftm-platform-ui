@@ -22,8 +22,8 @@ import {
   useUpdateEmployeeMutation,
 } from "./employeeApi";
 import type { Employee, EmployeeInput } from "./employee.types";
-import CommonGreyButton from "@/components/CommonGreyButton";
-import CommonBlueButton from "@/components/CommonBlueButton";
+import CommonGreyButton from "@/components/common/CommonGreyButton";
+import CommonBlueButton from "@/components/common/CommonBlueButton";
 import { tokens } from "@/theme";
 import CommonDatePicker from "@/components/common/CommonDatePicker";
 

@@ -25,7 +25,7 @@ import {
   useDeleteReportAttachmentMutation,
   useDownloadReportAttachmentMutation,
 } from "@/features/report/reportAttachmentApi";
-import CommonBlueButton from "@/components/CommonBlueButton";
+import CommonBlueButton from "@/components/common/CommonBlueButton";
 
 // -----------------------------------------------------------------------------
 // Types

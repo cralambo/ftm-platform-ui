@@ -27,8 +27,8 @@ import {
 } from "@/features/coFunder/coFunderApi";
 import type { CoFunder } from "@/features/coFunder/coFunder.types";
 import CommonTablePagination from "@/components/CommonTablePagination";
-import CommonTable from "@/components/CommonTable";
-import CommonTableHead from "@/components/CommonTableHead";
+import CommonTable from "@/components/common/CommonTable";
+import CommonTableHead from "@/components/common/CommonTableHead";
 
 export default function CoFunderList() {
   const { page, size, setPage, changeSize } = usePagination();

@@ -15,8 +15,8 @@ import { getErrorMessage } from "@/utils/errors";
 import { useAddRegionMutation, useUpdateRegionMutation } from "./regionApi";
 import type { Region, RegionInput } from "./region.types";
 import { tokens } from "@/theme";
-import CommonGreyButton from "@/components/CommonGreyButton";
-import CommonBlueButton from "@/components/CommonBlueButton";
+import CommonGreyButton from "@/components/common/CommonGreyButton";
+import CommonBlueButton from "@/components/common/CommonBlueButton";
 
 const schema = Yup.object({
   name: Yup.string()

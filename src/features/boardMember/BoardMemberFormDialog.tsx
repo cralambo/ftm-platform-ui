@@ -19,8 +19,8 @@ import {
   useUpdateBoardMemberMutation,
 } from "./boardMemberApi";
 import type { BoardMember, BoardMemberInput } from "./boardMember.types";
-import CommonGreyButton from "@/components/CommonGreyButton";
-import CommonBlueButton from "@/components/CommonBlueButton";
+import CommonGreyButton from "@/components/common/CommonGreyButton";
+import CommonBlueButton from "@/components/common/CommonBlueButton";
 import { tokens } from "@/theme";
 import CommonDatePicker from "@/components/common/CommonDatePicker";
 import dayjs from "dayjs";

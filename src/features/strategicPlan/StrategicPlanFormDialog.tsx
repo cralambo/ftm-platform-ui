@@ -19,8 +19,8 @@ import {
 } from "./strategicPlanApi";
 import type { StrategicPlan, StrategicPlanInput } from "./strategicPlan.types";
 import { tokens } from "@/theme";
-import CommonGreyButton from "@/components/CommonGreyButton";
-import CommonBlueButton from "@/components/CommonBlueButton";
+import CommonGreyButton from "@/components/common/CommonGreyButton";
+import CommonBlueButton from "@/components/common/CommonBlueButton";
 import CommonDatePicker from "@/components/common/CommonDatePicker";
 import dayjs from "dayjs";
 
