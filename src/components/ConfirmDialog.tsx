@@ -8,8 +8,8 @@ import {
   DialogTitle,
   useTheme,
 } from "@mui/material";
-import CommonGreyButton from "./CommonGreyButton";
-import CommonErrorButton from "./CommonErrorButton";
+import CommonGreyButton from "./common/CommonGreyButton";
+import CommonErrorButton from "./common/CommonErrorButton";
 
 interface Props {
   open: boolean;

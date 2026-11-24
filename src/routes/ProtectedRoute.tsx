@@ -2,17 +2,16 @@ import { useEffect, useRef, useState } from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { Box, CircularProgress } from "@mui/material";
 
-import { useAppDispatch, useAppSelector } from "@/app/hooks";
+import { useAppSelector } from "@/app/hooks";
 import { useRefreshMutation } from "@/features/Auth/authApi";
-import { setCredentials } from "@/features/Auth/authSlice";
 
 export default function ProtectedRoute() {
-  const dispatch = useAppDispatch();
   const token = useAppSelector((state) => state.auth.accessToken);
   const location = useLocation();
 
   const [refresh] = useRefreshMutation();
   const [checking, setChecking] = useState(true);
+
   const started = useRef(false);
 
   useEffect(() => {
@@ -22,21 +21,21 @@ export default function ProtectedRoute() {
     }
 
     if (started.current) return;
+
     started.current = true;
 
     const restoreSession = async () => {
       try {
-        const response = await refresh().unwrap();
-        dispatch(setCredentials(response));
+        await refresh().unwrap();
       } catch (error) {
-        console.error("Échec du refresh :", error);
+        console.error("Échec de restauration de session :", error);
       } finally {
         setChecking(false);
       }
     };
 
     void restoreSession();
-  }, [token, refresh, dispatch]);
+  }, [token, refresh]);
 
   if (checking) {
     return (

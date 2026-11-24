@@ -20,8 +20,8 @@ import {
 } from "./districtApi";
 import type { District, DistrictInput } from "./district.type";
 import { tokens } from "@/theme";
-import CommonBlueButton from "@/components/CommonBlueButton";
-import CommonGreyButton from "@/components/CommonGreyButton";
+import CommonBlueButton from "@/components/common/CommonBlueButton";
+import CommonGreyButton from "@/components/common/CommonGreyButton";
 
 const schema = Yup.object({
   regionId: Yup.string().required("Région obligatoire"),

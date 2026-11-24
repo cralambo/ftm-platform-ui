@@ -18,8 +18,8 @@ import {
 } from "./positionApi";
 import type { Position, PositionInput } from "./position.types";
 import { tokens } from "@/theme";
-import CommonGreyButton from "@/components/CommonGreyButton";
-import CommonBlueButton from "@/components/CommonBlueButton";
+import CommonGreyButton from "@/components/common/CommonGreyButton";
+import CommonBlueButton from "@/components/common/CommonBlueButton";
 
 const schema = Yup.object({
   code: Yup.string()

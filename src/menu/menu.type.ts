@@ -4,7 +4,9 @@ export interface MenuItemType {
   icon?: React.ReactNode;
   path?: string;
   children?: MenuItemType[];
+
   roles?: string[];
+  requireAllPermissions?: boolean;
   permissions?: string[];
   userTypes?: string[];
 }

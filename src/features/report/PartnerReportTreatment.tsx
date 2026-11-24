@@ -33,13 +33,13 @@ import {
   useSubmitPartnerReportMutation,
 } from "./partnerReportApi";
 
-import CommonCard from "@/components/CommonCard";
+import CommonCard from "@/components/common/CommonCard";
 import TechnicalReportSection from "./components/TechnicalReportSection";
 import FinancialReportSection from "./components/FinancialReportSection";
 import GeneralReportAttachments from "./components/GeneralReportAttachments";
 import { tokens } from "@/theme";
-import CommonGreyButton from "@/components/CommonGreyButton";
-import CommonBlueButton from "@/components/CommonBlueButton";
+import CommonGreyButton from "@/components/common/CommonGreyButton";
+import CommonBlueButton from "@/components/common/CommonBlueButton";
 
 const statusLabels: Record<string, string> = {
   DRAFT: "Brouillon",

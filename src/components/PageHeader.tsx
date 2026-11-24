@@ -1,14 +1,21 @@
+import type { ReactNode } from "react";
 import { Stack, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import CommonBlueButton from "./CommonBlueButton";
+import CommonBlueButton from "./common/CommonBlueButton";
 
 interface Props {
   title: string;
   addLabel?: string;
   onAdd?: () => void;
+  addAction?: ReactNode;
 }
 
-export default function PageHeader({ title, addLabel, onAdd }: Props) {
+export default function PageHeader({
+  title,
+  addLabel,
+  onAdd,
+  addAction,
+}: Props) {
   const showAddButton = Boolean(addLabel && onAdd);
 
   return (
@@ -24,16 +31,17 @@ export default function PageHeader({ title, addLabel, onAdd }: Props) {
         {title}
       </Typography>
 
-      {showAddButton && (
-        <CommonBlueButton
-          size="small"
-          variant="outlined"
-          startIcon={<AddIcon />}
-          onClick={onAdd}
-        >
-          {addLabel}
-        </CommonBlueButton>
-      )}
+      {addAction ??
+        (showAddButton && (
+          <CommonBlueButton
+            size="small"
+            variant="outlined"
+            startIcon={<AddIcon />}
+            onClick={onAdd}
+          >
+            {addLabel}
+          </CommonBlueButton>
+        ))}
     </Stack>
   );
 }

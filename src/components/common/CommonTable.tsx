@@ -30,10 +30,13 @@ export default function CommonTable({
       variant="outlined"
       sx={[
         {
+          border: 0,
+          boxShadow: "none",
+
           bgcolor: (theme) =>
             theme.palette.mode === "light" ? "#ffffff" : colors.primary[600],
+
           color: "text.primary",
-          borderColor: "divider",
 
           "& .MuiTableCell-root": {
             bgcolor: "transparent",
@@ -43,7 +46,6 @@ export default function CommonTable({
             borderRightColor: "divider",
           },
 
-          // Supprimer la bordure droite de la dernière colonne
           "& .MuiTableCell-root:last-child": {
             borderRight: 0,
           },

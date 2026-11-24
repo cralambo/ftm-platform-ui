@@ -39,7 +39,7 @@ import { statusMeta } from "./projectStatus";
 import type { DisbursementSchedule } from "../disbursement_schedules/disbursementSchedule.types";
 import CreateDisbursementScheduleFormDialog from "../disbursement_schedules/CreateDisbursementScheduleFormDialog";
 import { tokens } from "@/theme";
-import CommonTable from "@/components/CommonTable";
+import CommonTable from "@/components/common/CommonTable";
 import { useInitializePartnerReportMutation } from "../report/partnerReportApi";
 import { enqueueSnackbar } from "notistack";
 
@@ -301,9 +301,12 @@ export default function ProjectDetail() {
 
       navigate(`/partner-reports/${report.id}`);
     } catch (error) {
-      enqueueSnackbar("Impossible d'initialiser le rapport partenaire.", {
-        variant: "error",
-      });
+      console.error("Erreur ouverture rapport :", error);
+
+      enqueueSnackbar(
+        "Impossible d'ouvrir ou d'initialiser le rapport partenaire.",
+        { variant: "error" },
+      );
     }
   };
 

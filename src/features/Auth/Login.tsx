@@ -5,15 +5,13 @@ import * as Yup from "yup";
 import {
   Alert,
   Box,
-  Button,
-  Card,
-  CardContent,
   CircularProgress,
+  Container,
   IconButton,
   InputAdornment,
+  Paper,
   Stack,
   TextField,
-  Typography,
 } from "@mui/material";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
@@ -22,6 +20,8 @@ import { useAppSelector } from "@/app/hooks";
 import { fieldProps } from "@/utils/formik";
 import { getErrorMessage } from "@/utils/errors";
 import { useLoginMutation } from "./authApi";
+import CommonBlueButton from "@/components/common/CommonBlueButton";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
 
 const schema = Yup.object({
   email: Yup.string()
@@ -29,6 +29,19 @@ const schema = Yup.object({
     .email("Adresse e-mail invalide")
     .required("E-mail obligatoire"),
   password: Yup.string().required("Mot de passe obligatoire"),
+});
+
+const loginTheme = createTheme({
+  palette: {
+    mode: "dark",
+    primary: {
+      main: "#004D95",
+    },
+    background: {
+      default: "#101624",
+      paper: "#040509",
+    },
+  },
 });
 
 export default function Login() {
@@ -64,71 +77,104 @@ export default function Login() {
     : null;
 
   return (
-    <Box
-      sx={{ minHeight: "100vh", display: "grid", placeItems: "center", p: 2 }}
-    >
-      <Card sx={{ width: "100%", maxWidth: 420 }}>
-        <CardContent sx={{ p: 4 }}>
-          <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
-            Connexion
-          </Typography>
-          <Typography color="text.secondary" sx={{ mb: 3 }}>
-            Connectez-vous à FTM Platform
-          </Typography>
-
-          {errorMessage && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {errorMessage}
-            </Alert>
-          )}
-
-          <form onSubmit={formik.handleSubmit} noValidate>
-            <Stack spacing={1}>
-              <TextField
-                label="E-mail"
-                type="email"
-                autoComplete="email"
-                autoFocus
-                {...fieldProps(formik, "email")}
-              />
-              <TextField
-                label="Mot de passe"
-                type={showPassword ? "text" : "password"}
-                autoComplete="current-password"
-                {...fieldProps(formik, "password")}
-                slotProps={{
-                  input: {
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton
-                          aria-label="Afficher le mot de passe"
-                          onClick={() => setShowPassword((v) => !v)}
-                          edge="end"
-                        >
-                          {showPassword ? <VisibilityOff /> : <Visibility />}
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  },
+    <ThemeProvider theme={loginTheme}>
+      <Box
+        sx={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: "background.default",
+        }}
+      >
+        <Container maxWidth="xs">
+          <Paper
+            elevation={8}
+            sx={{
+              p: 4,
+              bgcolor: "background.paper",
+              borderRadius: 3,
+            }}
+          >
+            {/* LOGO */}
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                mb: 3,
+              }}
+            >
+              <Box
+                component="img"
+                src="/images/logo.png"
+                alt="Logo Tany Meva"
+                sx={{
+                  width: 150,
+                  height: "auto",
                 }}
               />
-              <Button
-                type="submit"
-                variant="contained"
-                size="large"
-                disabled={isLoading}
-                startIcon={
-                  isLoading ? (
-                    <CircularProgress size={18} color="inherit" />
-                  ) : undefined
-                }
-              >
-                Se connecter
-              </Button>
-            </Stack>
-          </form>
-        </CardContent>
-      </Card>
-    </Box>
+            </Box>
+
+            {errorMessage && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {errorMessage}
+              </Alert>
+            )}
+
+            <form onSubmit={formik.handleSubmit} noValidate>
+              <Stack spacing={2}>
+                <TextField
+                  label="E-mail"
+                  type="email"
+                  size="small"
+                  autoComplete="email"
+                  autoFocus
+                  {...fieldProps(formik, "email")}
+                />
+
+                <TextField
+                  label="Mot de passe"
+                  type={showPassword ? "text" : "password"}
+                  size="small"
+                  autoComplete="current-password"
+                  {...fieldProps(formik, "password")}
+                  slotProps={{
+                    input: {
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton
+                            aria-label="Afficher le mot de passe"
+                            onClick={() => setShowPassword((v) => !v)}
+                            edge="end"
+                          >
+                            {showPassword ? <VisibilityOff /> : <Visibility />}
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    },
+                  }}
+                />
+
+                <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+                  <CommonBlueButton
+                    type="submit"
+                    variant="contained"
+                    size="large"
+                    disabled={isLoading}
+                    startIcon={
+                      isLoading ? (
+                        <CircularProgress size={18} color="inherit" />
+                      ) : undefined
+                    }
+                  >
+                    Se connecter
+                  </CommonBlueButton>
+                </Box>
+              </Stack>
+            </form>
+          </Paper>
+        </Container>
+      </Box>
+    </ThemeProvider>
   );
 }

@@ -26,9 +26,9 @@ import {
   useGetRegionsQuery,
 } from "@/features/region/regionApi";
 import type { Region } from "@/features/region/region.types";
-import CommonTable from "@/components/CommonTable";
+import CommonTable from "@/components/common/CommonTable";
 import CommonTablePagination from "@/components/CommonTablePagination";
-import CommonTableHead from "@/components/CommonTableHead";
+import CommonTableHead from "@/components/common/CommonTableHead";
 
 export default function RegionList() {
   const { page, size, setPage, changeSize } = usePagination();

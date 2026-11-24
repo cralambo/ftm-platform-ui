@@ -26,8 +26,8 @@ import {
   useDownloadReportAttachmentMutation,
 } from "@/features/report/reportAttachmentApi";
 
-import CommonDialog from "@/components/CommonDialog";
-import CommonBlueButton from "@/components/CommonBlueButton";
+import CommonDialog from "@/components/common/CommonDialog";
+import CommonBlueButton from "@/components/common/CommonBlueButton";
 import { tokens } from "@/theme";
 
 // -----------------------------------------------------------------------------

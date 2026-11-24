@@ -14,8 +14,8 @@ import { fieldProps } from "@/utils/formik";
 import { getErrorMessage } from "@/utils/errors";
 import { useAddTopicMutation, useUpdateTopicMutation } from "./topicApi";
 import type { Topic, TopicInput } from "./topic.types";
-import CommonGreyButton from "@/components/CommonGreyButton";
-import CommonBlueButton from "@/components/CommonBlueButton";
+import CommonGreyButton from "@/components/common/CommonGreyButton";
+import CommonBlueButton from "@/components/common/CommonBlueButton";
 import { tokens } from "@/theme";
 
 const schema = Yup.object({

@@ -28,12 +28,15 @@ export const tagTypes = [
   "Topic",
   "Project",
   "Role",
+  "Permission",
   "DisbursementSchedule",
   "PartnerReport",
   "TechnicalReportItem",
   "FinancialReportItem",
   "FinancialSummary",
   "ReportAttachment",
+  "CurrentUser",
+  "UserDetailResponse",
 ] as const;
 export type TagType = (typeof tagTypes)[number];
 
@@ -61,42 +64,66 @@ const baseQueryWithRefresh: BaseQueryFn<
   string | FetchArgs,
   unknown,
   FetchBaseQueryError
-> = async (args, api, extraOptions) => {
+> = async (args, baseQueryApi, extraOptions) => {
   await mutex.waitForUnlock();
 
-  let result = await rawBaseQuery(args, api, extraOptions);
+  let result = await rawBaseQuery(args, baseQueryApi, extraOptions);
 
+  // Ne pas renouveler le token pour les endpoints d'authentification
   if (result.error?.status !== 401 || isAuthUrl(args)) {
     return result;
   }
 
+  // Vérifier qu'un refresh n'est pas déjà en cours
   if (!mutex.isLocked()) {
     const release = await mutex.acquire();
 
     try {
+      // Vérifier que la session existe toujours
+      const accessToken = (baseQueryApi.getState() as RootState).auth
+        .accessToken;
+
+      if (!accessToken) {
+        return result;
+      }
+
+      // Demander un nouveau Access Token
       const refreshResult = await rawBaseQuery(
         {
           url: "/auth/refresh",
           method: "POST",
         },
-        api,
+        baseQueryApi,
         extraOptions,
       );
 
       if (refreshResult.data) {
-        api.dispatch(setCredentials(refreshResult.data as AuthResponse));
+        // Mettre à jour les credentials
+        baseQueryApi.dispatch(
+          setCredentials(refreshResult.data as AuthResponse),
+        );
 
-        result = await rawBaseQuery(args, api, extraOptions);
+        // Rejouer la requête initiale
+        result = await rawBaseQuery(args, baseQueryApi, extraOptions);
       } else {
-        api.dispatch(logout());
+        // Refresh échoué : déconnexion locale
+        baseQueryApi.dispatch(logout());
+
+        // Réinitialiser le cache RTK Query
+        baseQueryApi.dispatch(api.util.resetApiState());
       }
     } finally {
       release();
     }
   } else {
+    // Un autre appel effectue déjà le refresh
     await mutex.waitForUnlock();
 
-    result = await rawBaseQuery(args, api, extraOptions);
+    const accessToken = (baseQueryApi.getState() as RootState).auth.accessToken;
+
+    if (accessToken) {
+      result = await rawBaseQuery(args, baseQueryApi, extraOptions);
+    }
   }
 
   return result;
